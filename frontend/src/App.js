@@ -10,6 +10,7 @@ import EditSensorParameter from "./pages/sensor&parameteredit";
 import UserAdmin from "./pages/user&admin";
 import AddUserAdmin from "./pages/user&adminadd";
 import EditUserAdmin from "./pages/user&adminedit";
+import ManualKontrol from "./pages/manualkontrol";
 import Navbar from "./component/navbar";
 import {Loader} from 'lucide-react'
 import {useAuthStore} from "./store/useAuthStore";
@@ -49,6 +50,7 @@ function App() {
           <Route path="/user&admin" element={authAccount ? (authAccount.role === "Admin" ? <UserAdmin/> : <Navigate to="/" />) : <Navigate to="/login" />} />
           <Route path="/user&adminadd" element={authAccount ? (authAccount.role === "Admin" ? <AddUserAdmin/> : <Navigate to="/" />) : <Navigate to="/login" />} />
           <Route path="/user&adminedit/:_id" element={authAccount ? (authAccount.role === "Admin" ? <EditUserAdmin/> : <Navigate to="/" />) : <Navigate to="/login" />} />
+          <Route path="/manualkontrol" element={authAccount ? <ManualKontrol /> : <Navigate to="/login" />} />
         </Routes>
 
         <Toaster />

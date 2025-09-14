@@ -3,10 +3,12 @@ import { axiosInstance } from '../lib/axios.js';
 import { useAuthStore } from "./useAuthStore.js";
 
 export const usePLTSStore = create((set, get) => ({
-    VFD: [],              // Menyimpan array data output_power dari VFD
-    latestVFD: null,      // Menyimpan data terbaru dari output_power VFD
-    InverterSRNE: [],     // Menyimpan array data pv_power dan battery_level dari InverterSRNE
-    latestInverterSRNE: null, // Menyimpan data terbaru dari pv_power dan battery_level
+    VFD: [],              
+    latestVFD: null,
+    InverterSolis: [],     
+    latestInverterSolis: null, 
+    InverterSRNE: [],     
+    latestInverterSRNE: null, 
 
     // Fungsi untuk mengambil data VFD (10 data terakhir)
     getVFD: async () => {
@@ -32,6 +34,33 @@ export const usePLTSStore = create((set, get) => ({
                 }})
         } catch (error) {
             console.log("Error in getLatestVFD:", error.message);
+        }
+    },
+
+    // Fungsi untuk mengambil data InverterSolis (10 data terakhir)
+    getInverterSolis: async () => {
+        try {
+            const res = await axiosInstance.get('/InverterSolis/graph');
+            if (Array.isArray(res.data)) {
+                const array = res.data.map(InverterSolis => InverterSolis.this_month_energy);
+                set({ InverterSolis: array });
+            } else {
+                console.error("Expected an array but got:", res.data);
+            }
+        } catch (error) {
+            console.log("Error in getInverterSolis:", error.message);
+        }
+    },
+    
+    // Fungsi untuk mengambil data terbaru InverterSolis
+    getLatestInverterSolis: async () => {
+        try {
+            const res = await axiosInstance.get('/InverterSolis/');
+            set({latestInverterSolis: {
+                this_month_energy: res.data[0].this_month_energy
+                }})
+        } catch (error) {
+            console.log("Error in getLatestInverterSolis:", error.message);
         }
     },
 
@@ -61,7 +90,7 @@ export const usePLTSStore = create((set, get) => ({
                 set({
                     latestInverterSRNE: {
                         pv_power: res.data[0].pv_power,
-                        battery_level: res.data[0].battery_level
+                        battery_level: res.data[0].battery_level,
                     }
                 });
             } else {
@@ -78,6 +107,7 @@ export const usePLTSStore = create((set, get) => ({
 
         // Hindari duplikasi listener
         socket.off("newDataVFD");
+        socket.off("newDataInverterSolis");
         socket.off("newDataInverterSRNE");
 
         // Pembaruan data untuk VFD
@@ -90,6 +120,19 @@ export const usePLTSStore = create((set, get) => ({
                     return { latestVFD: newData.output_power, VFD: updatedVFD };
                 });
                 console.log("Updated VFD Data:", newData.output_power);
+            }
+        });
+
+        // Pembaruan data untuk Inverter Solis
+        socket.on("newDataInverterSolis", (newData) => {
+            if (newData?.this_month_energy) {
+                set((state) => {
+                    const updatedInverterSolis = [...state.InverterSolis];
+                    updatedInverterSolis.unshift(newData.this_month_energy);
+                    if (updatedInverterSolis.length > 10) updatedInverterSolis.pop();
+                    return { latestInverterSolis: newData.this_month_energy, InverterSolis: updatedInverterSolis };
+                });
+                console.log("Updated Inverter Solis Data:", newData.this_month_energy);
             }
         });
 

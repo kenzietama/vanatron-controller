@@ -97,6 +97,11 @@ const Navbar = () => {
                       <span className="font-bold">Sensors & Parameters</span>
                     </Link>
                   </li>
+                  <li className="hover:bg-green-700 p-2 rounded-md cursor-pointer">
+                    <Link to="/manualkontrol" className="flex items-center space-x-3">
+                      <span className="font-bold">Manual Kontrol</span>
+                    </Link>
+                  </li>
                 </ul>
               )}
             </>
