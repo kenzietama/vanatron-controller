@@ -4,12 +4,18 @@ const Parameter = require("../models/parameter");
 const mongoose = require("mongoose")
 
 const addDisplayItem = async (req, res) => {
-    const {sensor, device, parameter} = req.body
+    const {sensor, device, parameter, displayName} = req.body
     try {
         const exist = await displayItem.findOne({sensor: sensor, device: device, parameter: parameter})
         if (exist) {
             return res.status(409).json({error: "Item already exist!"})
         }
+
+        const duplicate = await displayItem.findOne({displayName: displayName})
+        if (duplicate) {
+            return res.status(409).json({error: "Display name already exist!"})
+        }
+
 
         const response = await displayItem.create(req.body)
         res.status(201).json(response)
@@ -114,7 +120,7 @@ const getGraph = async (req, res) => {
         const results = [];
 
         for (const item of response) {
-            const { sensor, device, parameter } = item;
+            const { sensor, device, parameter, displayName } = item;
 
             try {
                 const collection = mongoose.connection.db.collection(sensor);
@@ -133,6 +139,7 @@ const getGraph = async (req, res) => {
 
                 // Transform the latestData to keep the original structure
                 const transformedData = latestData.map(dataItem => ({
+                    displayName: displayName,
                     value: dataItem[parameter], // Rename the field to 'value'
                     createdAt: dataItem.createdAt // Keep the createdAt field
                 }));

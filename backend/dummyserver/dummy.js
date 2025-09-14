@@ -25,9 +25,9 @@ async function sendDataToAPIDOA() {
         }
 
         const responseData = await response.json();
-        console.log('API Response:', responseData);
+        // console.log('API Response:', responseData);
     } catch (error) {
-        console.error('Error sending data to API:', error);
+        // console.error('Error sending data to API:', error);
     }
 }
 
@@ -52,9 +52,9 @@ async function sendDataToAPIDOC() {
         }
 
         const responseData = await response.json();
-        console.log('API Response:', responseData);
+        // console.log('API Response:', responseData);
     } catch (error) {
-        console.error('Error sending data to API:', error);
+        // console.error('Error sending data to API:', error);
     }
 }
 
@@ -91,9 +91,9 @@ async function sendDataToAPISolis() {
         }
 
         const responseData = await response.json();
-        console.log('API Response:', responseData);
+        // console.log('API Response:', responseData);
     } catch (error) {
-        console.error('Error sending data to API:', error);
+        // console.error('Error sending data to API:', error);
     }
 }
 
@@ -147,9 +147,9 @@ async function sendDataToAPISRNE() {
         }
 
         const responseData = await response.json();
-        console.log('API Response:', responseData);
+        // console.log('API Response:', responseData);
     } catch (error) {
-        console.error('Error sending data to API:', error);
+        // console.error('Error sending data to API:', error);
     }
 }
 
@@ -187,9 +187,9 @@ async function sendDataToAPIWS() {
         }
 
         const responseData = await response.json();
-        console.log('API Response:', responseData);
+        // console.log('API Response:', responseData);
     } catch (error) {
-        console.error('Error sending data to API:', error);
+        // console.error('Error sending data to API:', error);
     }
 }
 
@@ -215,9 +215,9 @@ async function sendDataToAPIPyranometer() {
         }
 
         const responseData = await response.json();
-        console.log('API Response:', responseData);
+        // console.log('API Response:', responseData);
     } catch (error) {
-        console.error('Error sending data to API:', error);
+        // console.error('Error sending data to API:', error);
     }
 }
 
@@ -243,9 +243,9 @@ async function sendDataToAPIRTD() {
         }
 
         const responseData = await response.json();
-        console.log('API Response:', responseData);
+        // console.log('API Response:', responseData);
     } catch (error) {
-        console.error('Error sending data to API:', error);
+        // console.error('Error sending data to API:', error);
     }
 }
 
@@ -320,9 +320,9 @@ async function sendDataToAPIVFD() {
         }
 
         const responseData = await response.json();
-        console.log('API Response:', responseData);
+        // console.log('API Response:', responseData);
     } catch (error) {
-        console.error('Error sending data to API:', error);
+        // console.error('Error sending data to API:', error);
     }
 }
 
