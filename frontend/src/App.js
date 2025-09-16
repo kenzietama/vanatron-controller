@@ -11,6 +11,7 @@ import UserAdmin from "./pages/user&admin";
 import AddUserAdmin from "./pages/user&adminadd";
 import EditUserAdmin from "./pages/user&adminedit";
 import ManualKontrol from "./pages/manualkontrol";
+import ManualKontrol from "./pages/manualkontrol";
 import Navbar from "./component/navbar";
 import {Loader} from 'lucide-react'
 import {useAuthStore} from "./store/useAuthStore";
@@ -50,6 +51,7 @@ function App() {
           <Route path="/user&admin" element={authAccount ? (authAccount.role === "Administrator" ? <UserAdmin/> : <Navigate to="/" />) : <Navigate to="/login" />} />
           <Route path="/user&adminadd" element={authAccount ? (authAccount.role === "Administrator" ? <AddUserAdmin/> : <Navigate to="/" />) : <Navigate to="/login" />} />
           <Route path="/user&adminedit/:_id" element={authAccount ? (authAccount.role === "Administrator" ? <EditUserAdmin/> : <Navigate to="/" />) : <Navigate to="/login" />} />
+          <Route path="/manualkontrol" element={authAccount ? <ManualKontrol /> : <Navigate to="/login" />} />
           <Route path="/manualkontrol" element={authAccount ? <ManualKontrol /> : <Navigate to="/login" />} />
         </Routes>
 
