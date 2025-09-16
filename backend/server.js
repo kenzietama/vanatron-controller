@@ -45,12 +45,16 @@ app.use("/api/sensors", sensorRoutes);
 app.use("/api/parameters", parameterRoutes);
 
 app.use('/api/dissolvedoxygen', dissolvedOxygenRoutes)
-app.use('/api/InverterSolis', inverterSolisRoutes)
 app.use('/api/InverterSRNE', inverterSRNERoutes)
 app.use('/api/pyranometer', pyranometerRoutes)
 app.use('/api/rtd', rtdRoutes)
 app.use('/api/vfd', vfdRoutes)
 app.use('/api/ws', wsRoutes)
+
+app.use('/api/ph', phRoutes)
+app.use('/api/salinity', salinityRoutes)
+app.use('/api/watertemperature', watertemperatureRoutes)
+
 app.use("/api/custom", customRoutes)
 
 server.listen(port, 'localhost', () => {

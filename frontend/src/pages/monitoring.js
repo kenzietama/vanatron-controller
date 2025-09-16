@@ -51,7 +51,13 @@ const Monitoring = () => {
             <div className="grid grid-cols-4 gap-4">
               {latestData && latestData.length > 0 ? (
                   latestData.map((data, index) => (
-                    <CardSensor key={data._id} name={`${data.displayName} (${data.unit})`} value={data.value} data={graph[index]} />
+                    <CardSensor 
+                      key={data._id} 
+                      name={`${data.displayName} (${data.unit})`} 
+                      displayName={data.displayName}
+                      value={data.value} 
+                      data={graph[index]} 
+                      unit={data.unit} />
                   ))) : (
                       <div>Not found</div>
               )}

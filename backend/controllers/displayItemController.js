@@ -43,8 +43,8 @@ const getDisplayItem = async (req, res) => {
 const updateDisplayItem = async (req, res) => {
     try {
         const { id } = req.params
-        const { sensor, device, parameter, displayName, unit  } = req.body;
-        const response = await displayItem.findByIdAndUpdate(id, {sensor, device, parameter, displayName, unit}, {new: true, runValidators: true})
+        const { sensor, device, parameter, displayName, unit, maxValue, minValue  } = req.body;
+        const response = await displayItem.findByIdAndUpdate(id, {sensor, device, parameter, displayName, unit, maxValue, minValue}, {new: true, runValidators: true})
 
         if(!response) {
             return res.status(404).send({message: 'Display item not found'})

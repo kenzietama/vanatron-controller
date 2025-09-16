@@ -10,6 +10,7 @@ import EditSensorParameter from "./pages/sensor&parameteredit";
 import UserAdmin from "./pages/user&admin";
 import AddUserAdmin from "./pages/user&adminadd";
 import EditUserAdmin from "./pages/user&adminedit";
+import ManualKontrol from "./pages/manualkontrol";
 import Navbar from "./component/navbar";
 import {Loader} from 'lucide-react'
 import {useAuthStore} from "./store/useAuthStore";
@@ -43,12 +44,13 @@ function App() {
           <Route path="/login" element={!authAccount ? <Login /> : <Navigate to="/" />} />
           <Route path="/monitoring" element={authAccount ? <Monitoring /> : <Navigate to="/login" />} />
           <Route path="/plts" element={authAccount ? <Plts /> : <Navigate to="/login" />} />
-          <Route path="/sensor&parameter" element={authAccount ? (authAccount.role === "Admin" ? <SensorParameter/> : <Navigate to="/" />) : <Navigate to="/login" />} />
-          <Route path="/sensor&parameteradd" element={authAccount ? (authAccount.role === "Admin" ? <AddSensorParameter/> : <Navigate to="/" />) : <Navigate to="/login" />} />
-          <Route path="/sensor&parameteredit/:_id" element={authAccount ? (authAccount.role === "Admin" ? <EditSensorParameter/> : <Navigate to="/" />) : <Navigate to="/login" />} />
-          <Route path="/user&admin" element={authAccount ? (authAccount.role === "Admin" ? <UserAdmin/> : <Navigate to="/" />) : <Navigate to="/login" />} />
-          <Route path="/user&adminadd" element={authAccount ? (authAccount.role === "Admin" ? <AddUserAdmin/> : <Navigate to="/" />) : <Navigate to="/login" />} />
-          <Route path="/user&adminedit/:_id" element={authAccount ? (authAccount.role === "Admin" ? <EditUserAdmin/> : <Navigate to="/" />) : <Navigate to="/login" />} />
+          <Route path="/sensor&parameter" element={authAccount ? (authAccount.role === "Administrator" ? <SensorParameter/> : <Navigate to="/" />) : <Navigate to="/login" />} />
+          <Route path="/sensor&parameteradd" element={authAccount ? (authAccount.role === "Administrator" ? <AddSensorParameter/> : <Navigate to="/" />) : <Navigate to="/login" />} />
+          <Route path="/sensor&parameteredit/:_id" element={authAccount ? (authAccount.role === "Administrator" ? <EditSensorParameter/> : <Navigate to="/" />) : <Navigate to="/login" />} />
+          <Route path="/user&admin" element={authAccount ? (authAccount.role === "Administrator" ? <UserAdmin/> : <Navigate to="/" />) : <Navigate to="/login" />} />
+          <Route path="/user&adminadd" element={authAccount ? (authAccount.role === "Administrator" ? <AddUserAdmin/> : <Navigate to="/" />) : <Navigate to="/login" />} />
+          <Route path="/user&adminedit/:_id" element={authAccount ? (authAccount.role === "Administrator" ? <EditUserAdmin/> : <Navigate to="/" />) : <Navigate to="/login" />} />
+          <Route path="/manualkontrol" element={authAccount ? <ManualKontrol /> : <Navigate to="/login" />} />
         </Routes>
 
         <Toaster />

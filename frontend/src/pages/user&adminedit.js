@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../component/header";
-import showicon from "../ikon/show.png"; // Icon for "Show Password"
-import hideicon from "../ikon/hide.png"; // Icon for "Hide Password"
+import { Eye, EyeOff } from "lucide-react"; // ✅ ganti ikon manual ke Lucide
 
 const EditUserAdmin = () => {
   const { _id } = useParams(); // Get _id from URL
@@ -20,7 +19,6 @@ const EditUserAdmin = () => {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-      console.log(_id)
     if (!_id) {
       setErrorMessage("Invalid user ID.");
       return;
@@ -68,33 +66,33 @@ const EditUserAdmin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-  
+
     // Hapus prefix "data:image/png;base64,"
     const processedPhoto = photo?.replace(/^data:image\/[a-z]+;base64,/, "") || null;
-  
+
     const updatedUser = {
       name,
       email,
       role,
       status: status.toLowerCase(),
-      photo: processedPhoto, // Hanya data Base64
+      photo: processedPhoto,
     };
-  
+
     if (password) {
       updatedUser.password = password;
     }
-  
+
     try {
       const response = await fetch(`http://localhost:5000/api/accounts/${_id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedUser),
       });
-  
+
       if (!response.ok) {
         throw new Error("Failed to update user");
       }
-  
+
       navigate("/user&admin");
     } catch (error) {
       console.error("Error updating user:", error);
@@ -121,17 +119,17 @@ const EditUserAdmin = () => {
             <h2 className="text-2xl font-semibold text-gray-800">Edit Users Admin</h2>
             <div className="flex space-x-4">
               <button
-                onClick={handleBack}
-                className="px-6 py-2 w-36 text-sm bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600"
-              >
-                Back
-              </button>
-              <button
                 onClick={handleSubmit}
                 className="px-6 py-2 w-36 text-sm bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600"
                 disabled={loading}
               >
                 {loading ? "Saving..." : "Save"}
+              </button>
+              <button
+                onClick={handleBack}
+                className="px-6 py-2 w-36 text-sm bg-white border border-blue-500 text-blue-500 font-semibold rounded-full hover:bg-blue-600 hover:text-white"
+              >
+                Back
               </button>
             </div>
           </div>
@@ -194,8 +192,9 @@ const EditUserAdmin = () => {
                 required
               >
                 <option value="">Select Role</option>
-                <option value="User">User</option>
-                <option value="Admin">Admin</option>
+                <option value="Administrator">Administrator</option>
+                <option value="Operator">Operator</option>
+                <option value="Researcher">Researcher</option>
               </select>
             </div>
 
@@ -237,12 +236,16 @@ const EditUserAdmin = () => {
                   className="w-full h-10 px-4 py-1 border border-gray-300 rounded-lg"
                   placeholder="Enter New Password (optional)"
                 />
-                <img
-                  src={showPassword ? showicon : hideicon}
-                  alt="Toggle Password Visibility"
+                <span
                   onClick={toggleShowPassword}
-                  className="absolute top-2 right-2 w-6 h-6 cursor-pointer"
-                />
+                  className="absolute top-2 right-2 cursor-pointer text-gray-600 hover:text-gray-800"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-6 h-6" />
+                  ) : (
+                    <Eye className="w-6 h-6" />
+                  )}
+                </span>
               </div>
             </div>
           </form>
