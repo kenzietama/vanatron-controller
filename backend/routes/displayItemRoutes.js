@@ -14,7 +14,7 @@ const router = express.Router();
 
 router.get('/monitoring', getData)
 
-router.get('/monitoring/graph', getGraph)
+router.get('/monitoring/graph/interval=:interval/', getGraph)
 
 router.get('/monitoring/latest', getLatestData)
 

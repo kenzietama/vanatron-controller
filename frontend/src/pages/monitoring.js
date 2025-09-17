@@ -9,7 +9,7 @@ const Monitoring = () => {
 
   useEffect( () => {
     getLatestData()
-    getGraph()
+    getGraph(10)
 
     subscribe()
   }, [getLatestData, getGraph, subscribe])
