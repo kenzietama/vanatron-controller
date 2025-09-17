@@ -11,7 +11,6 @@ import UserAdmin from "./pages/user&admin";
 import AddUserAdmin from "./pages/user&adminadd";
 import EditUserAdmin from "./pages/user&adminedit";
 import ManualKontrol from "./pages/manualkontrol";
-import ManualKontrol from "./pages/manualkontrol";
 import Navbar from "./component/navbar";
 import {Loader} from 'lucide-react'
 import {useAuthStore} from "./store/useAuthStore";

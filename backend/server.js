@@ -12,12 +12,14 @@ const sensorRoutes = require("./routes/sensorRoutes");
 const parameterRoutes = require("./routes/parameterRoutes");
 
 const dissolvedOxygenRoutes = require("./routes/dissolvedOxygenRoutes");
-const inverterSolisRoutes = require("./routes/inverterSolisRoutes");
 const inverterSRNERoutes = require("./routes/inverterSRNERoutes");
 const pyranometerRoutes = require("./routes/pyranometerRoutes");
 const rtdRoutes = require("./routes/rtdRoutes");
 const vfdRoutes = require("./routes/vfdRoutes");
 const wsRoutes = require("./routes/wsRoutes");
+const phRoutes = require("./routes/phRoutes");
+const salinityRoutes = require("./routes/salinityRoutes");
+const watertemperatureRoutes = require("./routes/watertemperatureRoutes");
 const customRoutes = require("./routes/customRoutes")
 
 const {io, app, server} = require("./lib/socket")
