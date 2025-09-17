@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../component/header";
-import showicon from "../ikon/show.png";
-import hideicon from "../ikon/hide.png";
+import { Eye, EyeOff } from "lucide-react";
 
 const CreateUserAdmin = () => {
   const [photo, setPhoto] = useState(null);
@@ -82,16 +81,16 @@ const CreateUserAdmin = () => {
             <h2 className="text-2xl font-semibold text-gray-800">Create Users Admin</h2>
             <div className="flex space-x-4">
               <button
-                onClick={handleBack}
-                className="px-6 py-2 w-36 text-sm bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600"
-              >
-                Back
-              </button>
-              <button
                 onClick={handleSubmit}
                 className="px-6 py-2 w-36 text-sm bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600"
               >
                 Save
+              </button>
+              <button
+                onClick={handleBack}
+                className="px-6 py-2 w-36 text-sm bg-white border border-blue-500 text-blue-500 font-semibold rounded-full hover:bg-blue-600 hover:text-white"
+              >
+                Back
               </button>
             </div>
           </div>
@@ -155,8 +154,9 @@ const CreateUserAdmin = () => {
                 required
               >
                 <option value="">Select Role</option>
-                <option value="Admin">Admin</option>
-                <option value="User">User</option>
+                <option value="Administrator">Administrator</option>
+                <option value="Operator">Operator</option>
+                <option value="Researcher">Researcher</option>
               </select>
             </div>
 
@@ -194,15 +194,18 @@ const CreateUserAdmin = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full h-10 px-4 py-1 border border-gray-300 rounded-lg"
-                  placeholder="Enter Password"
-                  required
+                  placeholder="Enter New Password (optional)"
                 />
-                <img
-                  src={showPassword ? showicon : hideicon}
-                  alt="Toggle Password Visibility"
+                <span
                   onClick={toggleShowPassword}
-                  className="absolute top-2 right-2 w-6 h-6 cursor-pointer"
-                />
+                  className="absolute top-2 right-2 cursor-pointer text-gray-600 hover:text-gray-800"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-6 h-6" />
+                  ) : (
+                    <Eye className="w-6 h-6" />
+                  )}
+                </span>
               </div>
             </div>
           </form>

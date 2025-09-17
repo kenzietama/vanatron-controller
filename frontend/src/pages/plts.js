@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import Header from "../component/header";
-import downloadIcon from "../ikon/download.png";
+import { Download } from "lucide-react"; // pakai icon bawaan lucide-react
 import { usePLTSStore } from "../store/usePLTSStore"; // Mengimpor store PLTS
 
 const PLTS = () => {
@@ -69,8 +69,41 @@ const PLTS = () => {
                 <p className="text-sm text-gray-500">WATT</p>
               </div>
               <div className="relative w-full h-[200px]">
-                <img src={downloadIcon} alt="Download" className="absolute top-[-30px] right-[10px] cursor-pointer w-6 h-6" onClick={() => handleDownload("chart-1")} />
-                <Line id="chart-1" data={{ labels: generateHistory(pvPower).map((point) => point.label), datasets: [{ label: "Watt Panel Surya History", data: generateHistory(pvPower).map((point) => point.value), borderColor: "rgba(53, 162, 235, 1)", backgroundColor: "rgba(53, 162, 235, 0.4)", fill: true, tension: 0.3 }] }} options={{ responsive: true, maintainAspectRatio: false, scales: { x: { title: { display: true, text: "Waktu (s)" } }, y: { title: { display: true, text: "Nilai" }, beginAtZero: true, ticks: { stepSize: 50 } } }, plugins: { legend: { display: false } } }} />
+                <button
+                  className="absolute top-[-30px] right-[10px] cursor-pointer p-1 rounded hover:bg-gray-200"
+                  onClick={() => handleDownload("chart-1")}
+                >
+                  <Download className="w-6 h-6 text-blue-600" />
+                </button>
+                <Line
+                  id="chart-1"
+                  data={{
+                    labels: generateHistory(pvPower).map((point) => point.label),
+                    datasets: [
+                      {
+                        label: "Watt Panel Surya History",
+                        data: generateHistory(pvPower).map((point) => point.value),
+                        borderColor: "rgba(53, 162, 235, 1)",
+                        backgroundColor: "rgba(53, 162, 235, 0.4)",
+                        fill: true,
+                        tension: 0.3,
+                      },
+                    ],
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                      x: { title: { display: true, text: "Waktu (s)" } },
+                      y: {
+                        title: { display: true, text: "Nilai" },
+                        beginAtZero: true,
+                        ticks: { stepSize: 50 },
+                      },
+                    },
+                    plugins: { legend: { display: false } },
+                  }}
+                />
               </div>
             </div>
 
@@ -82,8 +115,41 @@ const PLTS = () => {
                 <p className="text-sm text-gray-500">WATT</p>
               </div>
               <div className="relative w-full h-[200px]">
-                <img src={downloadIcon} alt="Download" className="absolute top-[-30px] right-[10px] cursor-pointer w-6 h-6" onClick={() => handleDownload("chart-2")} />
-                <Line id="chart-2" data={{ labels: generateHistory(vfdOutputPower).map((point) => point.label), datasets: [{ label: "Watt Turbin History", data: generateHistory(vfdOutputPower).map((point) => point.value), borderColor: "rgba(53, 162, 235, 1)", backgroundColor: "rgba(53, 162, 235, 0.4)", fill: true, tension: 0.3 }] }} options={{ responsive: true, maintainAspectRatio: false, scales: { x: { title: { display: true, text: "Waktu (s)" } }, y: { title: { display: true, text: "Nilai" }, beginAtZero: true, ticks: { stepSize: 50 } } }, plugins: { legend: { display: false } } }} />
+                <button
+                  className="absolute top-[-30px] right-[10px] cursor-pointer p-1 rounded hover:bg-gray-200"
+                  onClick={() => handleDownload("chart-2")}
+                >
+                  <Download className="w-6 h-6 text-blue-600" />
+                </button>
+                <Line
+                  id="chart-2"
+                  data={{
+                    labels: generateHistory(vfdOutputPower).map((point) => point.label),
+                    datasets: [
+                      {
+                        label: "Watt Turbin History",
+                        data: generateHistory(vfdOutputPower).map((point) => point.value),
+                        borderColor: "rgba(53, 162, 235, 1)",
+                        backgroundColor: "rgba(53, 162, 235, 0.4)",
+                        fill: true,
+                        tension: 0.3,
+                      },
+                    ],
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                      x: { title: { display: true, text: "Waktu (s)" } },
+                      y: {
+                        title: { display: true, text: "Nilai" },
+                        beginAtZero: true,
+                        ticks: { stepSize: 50 },
+                      },
+                    },
+                    plugins: { legend: { display: false } },
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -96,8 +162,41 @@ const PLTS = () => {
               <p className="text-sm text-gray-500">%</p>
             </div>
             <div className="relative w-full h-[200px]">
-              <img src={downloadIcon} alt="Download" className="absolute top-[-30px] right-[10px] cursor-pointer w-6 h-6" onClick={() => handleDownload("chart-3")} />
-              <Line id="chart-3" data={{ labels: generateHistory(batteryLevel).map((point) => point.label), datasets: [{ label: "Battery Capacity History", data: generateHistory(batteryLevel).map((point) => point.value), borderColor: "rgba(53, 162, 235, 1)", backgroundColor: "rgba(53, 162, 235, 0.4)", fill: true, tension: 0.3 }] }} options={{ responsive: true, maintainAspectRatio: false, scales: { x: { title: { display: true, text: "Waktu (s)" } }, y: { title: { display: true, text: "Nilai" }, beginAtZero: true, ticks: { stepSize: 50 } } }, plugins: { legend: { display: false } } }} />
+              <button
+                className="absolute top-[-30px] right-[10px] cursor-pointer p-1 rounded hover:bg-gray-200"
+                onClick={() => handleDownload("chart-3")}
+              >
+                <Download className="w-6 h-6 text-blue-600" />
+              </button>
+              <Line
+                id="chart-3"
+                data={{
+                  labels: generateHistory(batteryLevel).map((point) => point.label),
+                  datasets: [
+                    {
+                      label: "Battery Capacity History",
+                      data: generateHistory(batteryLevel).map((point) => point.value),
+                      borderColor: "rgba(53, 162, 235, 1)",
+                      backgroundColor: "rgba(53, 162, 235, 0.4)",
+                      fill: true,
+                      tension: 0.3,
+                    },
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  scales: {
+                    x: { title: { display: true, text: "Waktu (s)" } },
+                    y: {
+                      title: { display: true, text: "Nilai" },
+                      beginAtZero: true,
+                      ticks: { stepSize: 50 },
+                    },
+                  },
+                  plugins: { legend: { display: false } },
+                }}
+              />
             </div>
           </div>
 

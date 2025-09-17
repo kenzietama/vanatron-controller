@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import gambarudang from '../gambar/gambarudang.png';
-import showicon from '../ikon/show.png';
-import hideicon from '../ikon/hide.png';
 import logo from '../ikon/icon.png';
-import {useAuthStore} from "../store/useAuthStore";
-import {Loader2} from "lucide-react";
+import { useAuthStore } from "../store/useAuthStore";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 
 const Login = () => {
@@ -13,13 +11,12 @@ const Login = () => {
     email: "",
     password: "",
   });
-  const {login, isLoggingIn, connectSocket} = useAuthStore()
+  const { login, isLoggingIn } = useAuthStore();
 
   const validateForm = () => {
     if (!formData.email.trim()) return toast.error("Email is required");
     if (!/\S+@\S+\.\S+/.test(formData.email)) return toast.error("Invalid email format");
     if (!formData.password) return toast.error("Password is required");
-
     return true;
   };
 
@@ -29,13 +26,11 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
     const success = validateForm();
-
     if (success === true) {
-        await login(formData);
+      await login(formData);
     }
-  }
+  };
 
   return (
     <div className="flex flex-col md:flex-row h-screen font-bold">
@@ -86,29 +81,29 @@ const Login = () => {
                 />
                 <span
                   onClick={togglePasswordVisibility}
-                  className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer"
+                  className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-gray-600 hover:text-gray-800"
                 >
-                  <img
-                    src={passwordType === 'password' ? hideicon : showicon}
-                    alt="Toggle Password"
-                    className="h-5 w-5"
-                  />
+                  {passwordType === 'password' ? (
+                    <Eye className="h-5 w-5" />
+                  ) : (
+                    <EyeOff className="h-5 w-5" />
+                  )}
                 </span>
               </div>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
+              className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition flex items-center justify-center gap-2"
               disabled={isLoggingIn}
             >
               {isLoggingIn ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin align-middle" />
-                    Loading...
-                  </>
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Loading...
+                </>
               ) : (
-                  "Login"
+                "Login"
               )}
             </button>
           </form>

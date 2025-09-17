@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../component/header";
-import SearchIkon from "../ikon/search.png";
+import { Search } from "lucide-react"; // ganti pakai lucide-react biar konsisten
 
 const UserAdmin = () => {
   const [usersData, setUsersData] = useState([]);
@@ -78,21 +78,26 @@ const UserAdmin = () => {
       <div className="flex h-full">
         <div className="flex-1 p-6">
           <div className="bg-white shadow-lg rounded-lg border border-gray-300 p-6 mb-6">
+            {/* 🔍 Search + Add Data */}
             <div className="flex justify-between items-center mb-6">
-              <div className="flex-1 relative">
+              {/* Search bar fleksibel */}
+              <div className="flex-1 max-w-3xl relative">
                 <input
                   type="text"
                   placeholder="Search"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full max-w-3xl h-10 px-4 pl-10 border border-gray-300 rounded-lg"
+                  className="w-full h-10 pl-4 pr-12 border border-gray-300 rounded-lg"
                 />
-                <img
-                  src={SearchIkon}
-                  alt="Search Icon"
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5"
-                />
+                <button
+                  onClick={() => console.log("Search:", searchTerm)}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-md text-black"
+                >
+                  <Search className="w-5 h-5" />
+                </button>
               </div>
+
+              {/* Tombol Add Data */}
               <button
                 onClick={handleAddData}
                 className="ml-4 px-6 py-2 w-48 bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600"
@@ -101,6 +106,7 @@ const UserAdmin = () => {
               </button>
             </div>
 
+            {/* Tabel Users */}
             <table className="min-w-full table-auto mb-6">
               <thead className="bg-gray-200">
                 <tr>
@@ -144,16 +150,16 @@ const UserAdmin = () => {
                     <td className="px-4 py-2 text-sm text-center">
                       <div className="flex flex-col items-center space-y-2">
                         <button
-                          onClick={() => handleOpenModal(data._id)}
-                          className="px-3 py-1 w-24 bg-red-500 text-white font-semibold rounded-full hover:bg-red-600"
-                        >
-                          Delete
-                        </button>
-                        <button
                           onClick={() => handleEditData(data._id)}
                           className="px-3 py-1 w-24 bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600"
                         >
                           Edit
+                        </button>
+                        <button
+                          onClick={() => handleOpenModal(data._id)}
+                          className="px-3 py-1 w-24 bg-red-500 text-white font-semibold rounded-full hover:bg-red-600"
+                        >
+                          Delete
                         </button>
                       </div>
                     </td>
@@ -165,6 +171,7 @@ const UserAdmin = () => {
         </div>
       </div>
 
+      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white rounded-lg p-6 w-1/3 shadow-lg">
