@@ -20,10 +20,10 @@ export const useDataStore = create((set, get) => ({
         }
     },
 
-    getGraph: async () => {
+    getGraph: async (interval) => {
         set({ isGraphLoading: true })
         try {
-            const res = await axiosInstance.get('/displayitems/monitoring/graph')
+            const res = await axiosInstance.get('/displayitems/monitoring/graph/interval=' + interval + '/')
             set({graph: res.data})
         } catch (error) {
             console.log("Error fetching graph: ", error.message)
