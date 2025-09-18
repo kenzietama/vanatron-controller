@@ -404,12 +404,14 @@ const getGraph = async (req, res) => {
         const results = [];
 
         // Parse from route params
-        const intervalMinutes = Math.max(0.1, parseFloat(req.params.interval ?? '60'));
+        // const intervalMinutes = Math.max(0.1, parseFloat(req.params.interval ?? '60'));
         const points = 10;
-        const toleranceMinutes = intervalMinutes >= 60 ? 2 : 1;
+        // const toleranceMinutes = intervalMinutes >= 60 ? 2 : 1;
 
-        const intervalMs = intervalMinutes * 60 * 1000;
-        const toleranceMs = toleranceMinutes * 60 * 1000;
+        // const intervalMs = intervalMinutes * 60 * 1000;
+        // const toleranceMs = toleranceMinutes * 60 * 1000;
+        const intervalMs = Math.max(0.1, parseFloat(req.params.interval ?? '3')) * 1000;
+        const toleranceMs = 1000;
 
         for (const item of response) {
             const { sensor, device, parameter, displayName } = item;

@@ -6,13 +6,19 @@ import {useDataStore} from "../store/useDataStore";
 
 const Monitoring = () => {
   const {latestData, getLatestData, isValueLoading, getGraph, isGraphLoading, graph, subscribe} = useDataStore()
+  const [intervalMinutes, setIntervalMinutes] = useState(60)
 
   useEffect( () => {
     getLatestData()
-    getGraph(10)
+    // getGraph(60)
 
     subscribe()
-  }, [getLatestData, getGraph, subscribe])
+    // }, [getLatestData, subscribe])
+  },[])
+
+  useEffect(() => {
+    getGraph?.(intervalMinutes)
+  }, [getGraph, intervalMinutes]);
 
   useEffect(() => {
     if (latestData && graph !== null) {
@@ -21,6 +27,15 @@ const Monitoring = () => {
     }
   }, [latestData, graph]); // Log latestData whenever it changes
 
+  const handleIntervalChange = (minutes) => {
+    setIntervalMinutes(minutes);
+    getGraph?.(minutes);
+  };
+
+  const handleRefresh = (minutes) => {
+    const effective = minutes ?? intervalMinutes;
+    getGraph?.(effective);
+  }
 
   return (
     <div className="flex h-fullscreen bg-[#F9F4F4]">
@@ -57,7 +72,11 @@ const Monitoring = () => {
                       displayName={data.displayName}
                       value={data.value} 
                       data={graph[index]} 
-                      unit={data.unit} />
+                      unit={data.unit}
+                      currentInterval={intervalMinutes}
+                      onRefresh={handleRefresh}
+                      onIntervalChange={handleIntervalChange}
+                    />
                   ))) : (
                       <div>Not found</div>
               )}

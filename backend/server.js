@@ -12,7 +12,6 @@ const sensorRoutes = require("./routes/sensorRoutes");
 const parameterRoutes = require("./routes/parameterRoutes");
 
 const dissolvedOxygenRoutes = require("./routes/dissolvedOxygenRoutes");
-const inverterSolisRoutes = require("./routes/inverterSolisRoutes");
 const inverterSRNERoutes = require("./routes/inverterSRNERoutes");
 const pyranometerRoutes = require("./routes/pyranometerRoutes");
 const rtdRoutes = require("./routes/rtdRoutes");
