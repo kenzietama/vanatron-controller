@@ -1,34 +1,42 @@
-// Monitoring.js
-import React, {useEffect, useState} from 'react';
-import CardSensor from '../component/cardsensor';
-import Header from '../component/header';
-import {useDataStore} from "../store/useDataStore";
+// File: Monitoring.js
+import React, { useEffect } from "react";
+import CardSensor from "../component/cardsensor";
+import Header from "../component/header";
+import { useDataStore } from "../store/useDataStore";
 
 const Monitoring = () => {
-  const {latestData, getLatestData, isValueLoading, getGraph, isGraphLoading, graph, subscribe} = useDataStore()
+  const {
+    latestData,
+    getLatestData,
+    isValueLoading,
+    getGraph,
+    isGraphLoading,
+    graph,
+    subscribe,
+  } = useDataStore();
 
-  useEffect( () => {
-    getLatestData()
-    getGraph(10)
-
-    subscribe()
-  }, [getLatestData, getGraph, subscribe])
+  useEffect(() => {
+    getLatestData();
+    getGraph(10);
+    subscribe();
+  }, [getLatestData, getGraph, subscribe]);
 
   useEffect(() => {
     if (latestData && graph !== null) {
-      console.log('Latest Data:', latestData);
-      console.log('Graph data:', graph)
+      console.log("Latest Data:", latestData);
+      console.log("Graph data:", graph);
     }
-  }, [latestData, graph]); // Log latestData whenever it changes
-
+  }, [latestData, graph]);
 
   return (
     <div className="flex h-fullscreen bg-[#F9F4F4]">
-
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Include Header */}
-        <Header pageName="Monitoring" databaseName="Database / Monitoring" notifications={0} />
+        <Header
+          pageName="Monitoring"
+          databaseName="Database / Monitoring"
+          notifications={0}
+        />
 
         <div className="p-4 flex flex-col gap-4">
           {/* Map */}
@@ -46,23 +54,40 @@ const Monitoring = () => {
           {/* Sensor Data */}
           <div>
             {isValueLoading || isGraphLoading ? (
-                <p>loading</p>
+              <p>loading</p>
             ) : (
-            <div className="grid grid-cols-4 gap-4">
-              {latestData && latestData.length > 0 ? (
-                  latestData.map((data, index) => (
-                    <CardSensor 
-                      key={data._id} 
-                      name={`${data.displayName} (${data.unit})`} 
-                      displayName={data.displayName}
-                      value={data.value} 
-                      data={graph[index]} 
-                      unit={data.unit} />
-                  ))) : (
-                      <div>Not found</div>
-              )}
-            </div>
-              )}
+              <div className="grid grid-cols-4 gap-4">
+                {latestData && latestData.length > 0 ? (
+                  latestData.map((data, index) => {
+                    let valueClass = "text-gray-800"; // default warna angka
+
+                    if (data.value !== null) {
+                      if (data.value < Number(data.minValue)) {
+                        valueClass = "text-red-500"; // merah
+                      } else if (data.value > Number(data.maxValue)) {
+                        valueClass = "text-green-700"; // hijau tua
+                      } else {
+                        valueClass = "text-green-400"; // hijau muda
+                      }
+                    }
+
+                    return (
+                      <CardSensor
+                        key={data._id}
+                        name={`${data.displayName} (${data.unit})`}
+                        displayName={data.displayName}
+                        value={data.value}
+                        data={graph[index]}
+                        unit={data.unit}
+                        valueClass={valueClass} // kirim warna khusus angka
+                      />
+                    );
+                  })
+                ) : (
+                  <div>Not found</div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
