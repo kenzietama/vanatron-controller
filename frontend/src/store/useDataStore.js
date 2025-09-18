@@ -6,7 +6,8 @@ export const useDataStore = create((set, get) => ({
     graph: [],
     latestData: null,
     isValueLoading: false,
-    isGraphLoading: false,
+    isGraphLoading: true,
+    isGraphRefreshing: false,
 
     getLatestData: async () => {
         set({ isValueLoading: true });
@@ -21,7 +22,12 @@ export const useDataStore = create((set, get) => ({
     },
 
     getGraph: async (interval) => {
-        set({ isGraphLoading: true })
+        if(get().graph.length === 0) {
+            set({ isGraphLoading: true })
+            // set({ isGraphRefeshing: true })
+        } else {
+            set({ isGraphRefreshing: true })
+        }
         try {
             const res = await axiosInstance.get('/displayitems/monitoring/graph/interval=' + interval + '/')
             set({graph: res.data})
@@ -29,6 +35,7 @@ export const useDataStore = create((set, get) => ({
             console.log("Error fetching graph: ", error.message)
         } finally {
             set({isGraphLoading: false})
+            set({isGraphRefreshing: false})
         }
     },
 

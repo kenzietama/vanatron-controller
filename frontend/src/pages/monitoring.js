@@ -14,12 +14,18 @@ const Monitoring = () => {
     graph,
     subscribe,
   } = useDataStore();
+  const [intervalMinutes, setIntervalMinutes] = useState(60)
 
   useEffect(() => {
     getLatestData();
-    getGraph(10);
+    // getGraph(60);
     subscribe();
-  }, [getLatestData, getGraph, subscribe]);
+    // }, [getLatestData, subscribe]);
+  },[])
+
+  useEffect(() => {
+    getGraph?.(intervalMinutes)
+  }, [getGraph, intervalMinutes]);
 
   useEffect(() => {
     if (latestData && graph !== null) {
@@ -27,6 +33,15 @@ const Monitoring = () => {
       console.log("Graph data:", graph);
     }
   }, [latestData, graph]);
+  const handleIntervalChange = (minutes) => {
+    setIntervalMinutes(minutes);
+    getGraph?.(minutes);
+  };
+
+  const handleRefresh = (minutes) => {
+    const effective = minutes ?? intervalMinutes;
+    getGraph?.(effective);
+  }
 
   return (
     <div className="flex h-fullscreen bg-[#F9F4F4]">
@@ -80,7 +95,11 @@ const Monitoring = () => {
                         data={graph[index]}
                         unit={data.unit}
                         valueClass={valueClass} // kirim warna khusus angka
-                      />
+                     
+                      currentInterval={intervalMinutes}
+                      onRefresh={handleRefresh}
+                      onIntervalChange={handleIntervalChange}
+                    />
                     );
                   })
                 ) : (

@@ -1,5 +1,5 @@
 // File: CardSensor.jsx
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -11,7 +11,8 @@ import {
   PointElement,
   LineElement,
 } from "chart.js";
-import { X, Download } from "lucide-react"; // Gunakan lucide-react
+import { X, Download, RotateCw, Loader2 } from "lucide-react";
+import {useDataStore} from "../store/useDataStore"; // Gunakan lucide-react
 
 // Daftarkan chart.js
 ChartJS.register(
@@ -24,8 +25,14 @@ ChartJS.register(
   LineElement
 );
 
-const CardSensor = ({ name, displayName, value, data, unit }) => {
+const CardSensor = ({ name, displayName, value, data, currentInterval = 60, onIntervalChange, onRefresh, unit }) => {
+  const { isGraphRefreshing } = useDataStore();
   const [showDetail, setShowDetail] = useState(false);
+  const [selectedInterval, setSelectedInterval] = useState(currentInterval);
+
+  useEffect(() => {
+    setSelectedInterval(currentInterval);
+  }, [currentInterval, showDetail]);
 
   // Fungsi untuk menghitung nilai tertinggi, terendah, dan rata-rata
   const getHighestValue = () => Math.max(...data.map(item => item.value));
@@ -112,6 +119,16 @@ const CardSensor = ({ name, displayName, value, data, unit }) => {
     link.click();
   };
 
+  const handleIntervalChange = (e) => {
+    const minutes = Number(e.target.value);
+    setSelectedInterval(minutes);
+    if (onIntervalChange) onIntervalChange(minutes);
+  };
+
+  const handleRefresh = () => {
+    onRefresh?.(selectedInterval);
+  }
+
   return (
     <div className="bg-white p-4 rounded-lg shadow-lg text-center border border-gray-300">
       <h2 className="text-xl font-bold" style={{ fontFamily: "Inter, sans-serif" }}>
@@ -137,22 +154,58 @@ const CardSensor = ({ name, displayName, value, data, unit }) => {
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold text-left">{name} Details</h3>
               <div className="flex gap-2">
-                {/* Tombol Download */}
-                <button
-                  className="p-2 rounded-lg hover:bg-gray-200 transition"
-                  onClick={downloadChart}
-                  title="Download Chart"
+                {/* Dropdown Interval Waktu */}
+                <select
+                    aria-label="Interval"
+                    value={selectedInterval}
+                    onChange={handleIntervalChange}
+                    className="h-9 min-w-[140px] border border-gray-300 rounded-md px-2 py-1 text-sm disabled:opacity-60"
+                    title="Select interval"
+                    disabled={isGraphRefreshing}
                 >
-                  <Download className="h-6 w-6 text-blue-600" />
+                  <option value={3}>3 seconds</option>
+                  <option value={6}>6 seconds</option>
+                  <option value={12}>12 seconds</option>
+                  <option value={24}>24 seconds</option>
+                </select>
+
+                {/* Refresh button keeps constant size; icon swaps to spinner */}
+                <button
+                    type="button"
+                    className="inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-gray-200 transition disabled:opacity-60"
+                    onClick={handleRefresh}
+                    title={isGraphRefreshing ? "Refreshing..." : "Refresh"}
+                    aria-busy={isGraphRefreshing}
+                    aria-label="Refresh"
+                    disabled={isGraphRefreshing}
+                >
+                  {isGraphRefreshing ? (
+                      <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                  ) : (
+                      <RotateCw className="h-5 w-5 text-blue-600" />
+                  )}
                 </button>
 
-                {/* Tombol Close */}
+                {/* Download button with same fixed size */}
                 <button
-                  className="p-2 rounded-lg hover:bg-gray-200 transition"
-                  onClick={() => setShowDetail(false)}
-                  title="Close"
+                    type="button"
+                    className="inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-gray-200 transition"
+                    onClick={downloadChart}
+                    title="Download Chart"
+                    aria-label="Download"
                 >
-                  <X className="h-6 w-6 text-blue-600" />
+                  <Download className="h-5 w-5 text-blue-600" />
+                </button>
+
+                {/* Close button with same fixed size */}
+                <button
+                    type="button"
+                    className="inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-gray-200 transition"
+                    onClick={() => setShowDetail(false)}
+                    title="Close"
+                    aria-label="Close"
+                >
+                  <X className="h-5 w-5 text-blue-600" />
                 </button>
               </div>
             </div>

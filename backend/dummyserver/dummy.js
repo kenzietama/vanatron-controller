@@ -329,7 +329,7 @@ async function sendDataToAPIVFD() {
 // Set interval to send data every 3 seconds (3000 milliseconds)
 setInterval(sendDataToAPIDOA, 3000);
 setInterval(sendDataToAPIDOC, 2800);
-setInterval(sendDataToAPISolis, 2900);
+// setInterval(sendDataToAPISolis, 2900);
 setInterval(sendDataToAPISRNE, 2700);
 setInterval(sendDataToAPIWS, 2800);
 setInterval(sendDataToAPIPyranometer, 2850);
