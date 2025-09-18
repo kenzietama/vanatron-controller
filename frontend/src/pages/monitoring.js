@@ -1,5 +1,5 @@
 // File: Monitoring.js
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import CardSensor from "../component/cardsensor";
 import Header from "../component/header";
 import { useDataStore } from "../store/useDataStore";
@@ -14,25 +14,18 @@ const Monitoring = () => {
     graph,
     subscribe,
   } = useDataStore();
-  const [intervalMinutes, setIntervalMinutes] = useState(60)
+
+  const [intervalMinutes, setIntervalMinutes] = useState(60);
 
   useEffect(() => {
     getLatestData();
-    // getGraph(60);
     subscribe();
-    // }, [getLatestData, subscribe]);
-  },[])
+  }, []);
 
   useEffect(() => {
-    getGraph?.(intervalMinutes)
+    getGraph?.(intervalMinutes);
   }, [getGraph, intervalMinutes]);
 
-  useEffect(() => {
-    if (latestData && graph !== null) {
-      console.log("Latest Data:", latestData);
-      console.log("Graph data:", graph);
-    }
-  }, [latestData, graph]);
   const handleIntervalChange = (minutes) => {
     setIntervalMinutes(minutes);
     getGraph?.(minutes);
@@ -41,11 +34,10 @@ const Monitoring = () => {
   const handleRefresh = (minutes) => {
     const effective = minutes ?? intervalMinutes;
     getGraph?.(effective);
-  }
+  };
 
   return (
     <div className="flex h-fullscreen bg-[#F9F4F4]">
-      {/* Main Content */}
       <div className="flex-1 flex flex-col">
         <Header
           pageName="Monitoring"
@@ -73,35 +65,21 @@ const Monitoring = () => {
             ) : (
               <div className="grid grid-cols-4 gap-4">
                 {latestData && latestData.length > 0 ? (
-                  latestData.map((data, index) => {
-                    let valueClass = "text-gray-800"; // default warna angka
-
-                    if (data.value !== null) {
-                      if (data.value < Number(data.minValue)) {
-                        valueClass = "text-red-500"; // merah
-                      } else if (data.value > Number(data.maxValue)) {
-                        valueClass = "text-green-700"; // hijau tua
-                      } else {
-                        valueClass = "text-green-400"; // hijau muda
-                      }
-                    }
-
-                    return (
-                      <CardSensor
-                        key={data._id}
-                        name={`${data.displayName} (${data.unit})`}
-                        displayName={data.displayName}
-                        value={data.value}
-                        data={graph[index]}
-                        unit={data.unit}
-                        valueClass={valueClass} // kirim warna khusus angka
-                     
+                  latestData.map((data, index) => (
+                    <CardSensor
+                      key={data._id}
+                      name={`${data.displayName} (${data.unit})`}
+                      displayName={data.displayName}
+                      value={data.value}
+                      data={graph[index]}
+                      unit={data.unit}
+                      minValue={data.minValue}
+                      maxValue={data.maxValue}
                       currentInterval={intervalMinutes}
                       onRefresh={handleRefresh}
                       onIntervalChange={handleIntervalChange}
                     />
-                    );
-                  })
+                  ))
                 ) : (
                   <div>Not found</div>
                 )}
