@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
 
 const accountSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -9,6 +8,5 @@ const accountSchema = new mongoose.Schema({
   status: { type: String, required: true }, // 'active' or 'non-active'
   photo: { type: String, default: null }, // Base64 string
 });
-
 
 module.exports = mongoose.model("Account", accountSchema);

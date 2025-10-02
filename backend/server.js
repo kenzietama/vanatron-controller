@@ -10,6 +10,7 @@ const displayItemRoutes = require("./routes/displayItemRoutes");
 const authRoutes = require("./routes/authRoutes");
 const sensorRoutes = require("./routes/sensorRoutes");
 const parameterRoutes = require("./routes/parameterRoutes");
+const controlSystemRoutes = require("./routes/controlSystemRoutes");
 
 const dissolvedOxygenRoutes = require("./routes/dissolvedOxygenRoutes");
 const inverterSRNERoutes = require("./routes/inverterSRNERoutes");
@@ -45,6 +46,7 @@ app.use('/api/displayitems', displayItemRoutes)
 app.use("/api/auth", authRoutes)
 app.use("/api/sensors", sensorRoutes);
 app.use("/api/parameters", parameterRoutes);
+app.use("/api/control", controlSystemRoutes);
 
 app.use('/api/dissolvedoxygen', dissolvedOxygenRoutes)
 app.use('/api/InverterSRNE', inverterSRNERoutes)
