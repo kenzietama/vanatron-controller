@@ -1,11 +1,31 @@
 // NotificationDropdown.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { Bell, X } from "lucide-react";
+import { io } from "socket.io-client";
+import axios from "axios";
 
-const NotificationDropdown = ({ notifications: initialNotifications = [] }) => {
+const socket = io("http://localhost:5000", { withCredentials: true });
+
+const NotificationDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState(initialNotifications);
+  const [notifications, setNotifications] = useState([]);
   const notifRef = useRef(null);
+
+  // Load awal notifikasi dari backend
+  useEffect(() => {
+    axios.get("http://localhost:5000/api/notifications").then((res) => {
+      setNotifications(res.data);
+    });
+
+    // Listener dari socket
+    socket.on("new-notification", (notif) => {
+      setNotifications((prev) => [notif, ...prev]);
+    });
+
+    return () => {
+      socket.off("new-notification");
+    };
+  }, []);
 
   // Tutup dropdown kalau klik di luar
   useEffect(() => {
@@ -18,7 +38,7 @@ const NotificationDropdown = ({ notifications: initialNotifications = [] }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Hapus notifikasi tertentu
+  // Hapus notifikasi tertentu (hanya local, kalau mau sync ke backend perlu API delete)
   const removeNotification = (index) => {
     setNotifications((prev) => prev.filter((_, i) => i !== index));
   };
@@ -41,7 +61,7 @@ const NotificationDropdown = ({ notifications: initialNotifications = [] }) => {
         )}
       </button>
 
-      {/* Dropdown notifikasi */}
+      {/* Dropdown */}
       {isOpen && (
         <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-300 rounded-lg shadow-lg z-50">
           <div className="p-3 border-b font-semibold text-gray-700 flex justify-between items-center">

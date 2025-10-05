@@ -19,5 +19,9 @@ io.on("connection", socket => {
     })
 })
 
-module.exports =  {io, app, server}
+// Fungsi untuk kirim notifikasi ke semua client
+const sendNotification = (notification) => {
+  io.emit("new-notification", notification);
+};
 
+module.exports = { io, app, server, sendNotification };

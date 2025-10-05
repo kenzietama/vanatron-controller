@@ -11,6 +11,7 @@ const authRoutes = require("./routes/authRoutes");
 const sensorRoutes = require("./routes/sensorRoutes");
 const parameterRoutes = require("./routes/parameterRoutes");
 const controlSystemRoutes = require("./routes/controlSystemRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 const dissolvedOxygenRoutes = require("./routes/dissolvedOxygenRoutes");
 const inverterSRNERoutes = require("./routes/inverterSRNERoutes");
@@ -58,6 +59,7 @@ app.use('/api/ws', wsRoutes)
 app.use('/api/ph', phRoutes)
 app.use('/api/salinity', salinityRoutes)
 app.use('/api/watertemperature', watertemperatureRoutes)
+app.use("/api/notifications", notificationRoutes)
 
 app.use("/api/custom", customRoutes)
 
