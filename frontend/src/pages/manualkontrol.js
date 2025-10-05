@@ -1,15 +1,34 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import Header from "../component/header";
+import { useControlStore } from "../store/useControlStore";
 
 const ManualKontrol = () => {
-  const [watt, setWatt] = useState(50); // Nilai awal watt
-  const [inputWatt, setInputWatt] = useState(50); // Nilai input sementara
+  const { settings, isSettingsLoading, isSettingsUpdating, getSettings, setSettings } = useControlStore();
+
+  const [speed, setSpeed] = useState(50); // Nilai awal speed
+  const [target, setTarget] = useState(4); // Nilai awal target dissolved oxygen
+  const [inputTarget, setInputTarget] = useState(4); // Nilai input sementara
+  const [inputSpeed, setInputSpeed] = useState(50); // Nilai input sementara
   const [mode, setMode] = useState("manual"); // mode: manual / auto
   const [status, setStatus] = useState("OFF"); // status: ON / OFF
   const [pendingChange, setPendingChange] = useState(null); // simpan perubahan sebelum konfirmasi
   const [riwayat, setRiwayat] = useState([]); // daftar perubahan
 
   const akunAktif = "Admin1"; // bisa diganti sesuai sistem login
+
+  useEffect(() => {
+    getSettings();
+
+    // setRiwayat((prev) => [
+    //   ...prev,
+    //   {
+    //     akun: settings.createdBy.name,
+    //     waktu: createdAt,
+    //     perubahan: `Target: ${oldTarget} → ${pendingChange.value}`,
+    //     mode: mode,
+    //   },
+    // ]);
+  }, []);
 
   // handle perubahan mode
   const handleModeChange = (newMode) => {
@@ -26,38 +45,63 @@ const ManualKontrol = () => {
 
   // handle perubahan slider
   const handleSliderChange = (e) => {
-    const newWatt = parseInt(e.target.value, 10);
-    setPendingChange({ type: "watt", value: newWatt });
+    const newSpeed = parseInt(e.target.value, 10);
+    setPendingChange({ type: "speed", value: newSpeed });
   };
 
   // handle input manual
   const handleInputChange = (e) => {
-    setInputWatt(e.target.value);
+    setInputSpeed(e.target.value);
+  };
+
+  const handleTargetChange = (e) => {
+    setInputTarget(e.target.value);
   };
 
   // konfirmasi input manual
   const handleInputConfirm = () => {
-    const newWatt = parseInt(inputWatt, 10);
-    if (!isNaN(newWatt) && newWatt >= 0 && newWatt <= 100) {
-      setPendingChange({ type: "watt", value: newWatt });
+    const newSpeed = parseInt(inputSpeed, 10);
+    if (!isNaN(newSpeed) && newSpeed >= 0 && newSpeed <= 100) {
+      setPendingChange({ type: "speed", value: newSpeed });
     }
   };
 
-  // konfirmasi perubahan (baik mode, watt, maupun status)
+  const handleTargetConfirm = () => {
+    const newTarget = parseInt(inputTarget, 10);
+    if (!isNaN(newTarget) && newTarget >= 0 && newTarget <= 100) {
+      setPendingChange({ type: "target", value: newTarget });
+    }
+  }
+
+  // konfirmasi perubahan (baik mode, speed, maupun status)
   const handleConfirmChange = () => {
     if (!pendingChange) return;
 
     const waktuSekarang = new Date().toLocaleString();
 
-    if (pendingChange.type === "watt") {
-      const oldWatt = watt;
-      setWatt(pendingChange.value);
+    if (pendingChange.type === "speed") {
+      const oldSpeed = speed;
+      setSpeed(pendingChange.value);
       setRiwayat((prev) => [
         ...prev,
         {
           akun: akunAktif,
           waktu: waktuSekarang,
-          perubahan: `Watt: ${oldWatt} → ${pendingChange.value}`,
+          perubahan: `Speed: ${oldSpeed} → ${pendingChange.value}`,
+          mode: mode,
+        },
+      ]);
+    }
+
+    if (pendingChange.type === "target") {
+      const oldTarget = target;
+      setTarget(pendingChange.value);
+      setRiwayat((prev) => [
+        ...prev,
+        {
+          akun: akunAktif,
+          waktu: waktuSekarang,
+          perubahan: `Target: ${oldTarget} → ${pendingChange.value}`,
           mode: mode,
         },
       ]);
@@ -112,7 +156,7 @@ const ManualKontrol = () => {
         {/* Kontrol */}
         <div className="flex flex-col items-center border-2 border-gray-400 p-6 rounded-lg bg-white shadow-lg w-full max-w-2xl">
           <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-            Kontrol Watt Turbin
+            Kontrol Speed Turbin
           </h1>
 
           {/* Tombol ON / OFF */}
@@ -149,37 +193,37 @@ const ManualKontrol = () => {
             </button>
           </div>
 
-          {/* Tampilan Watt */}
+          {/* Tampilan Speed */}
           <div className="w-full h-20 bg-gray-200 border border-gray-400 rounded-lg flex items-center justify-center text-4xl font-bold text-gray-700 mb-6">
-            {status === "ON" ? `${watt} Watt` : "OFF"}
+            {status === "ON" ? `${speed} %` : "OFF"}
           </div>
 
-          {/* Kontrol Watt hanya aktif di mode manual & status ON */}
+          {/* Kontrol Speed hanya aktif di mode manual & status ON */}
           {mode === "manual" && status === "ON" && (
             <div className="w-full bg-gray-100 p-6 rounded-lg shadow-lg border border-gray-300 text-center">
               <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-                Watt: {watt}
+                Kecepatan: {speed} %
               </h2>
 
               <input
                 type="range"
                 min="0"
                 max="100"
-                value={watt}
+                value={speed}
                 onChange={handleSliderChange}
                 className="w-full cursor-pointer"
               />
 
               <div className="mt-4 flex flex-col items-center gap-4">
                 <h2 className="text-xl font-semibold text-gray-700">
-                  Input Manual Watt
+                  Input Manual Kecepatan
                 </h2>
                 <div className="flex items-center gap-4">
                   <input
                     type="number"
                     min="0"
                     max="100"
-                    value={inputWatt}
+                    value={inputSpeed}
                     onChange={handleInputChange}
                     className="p-2 border rounded w-20 text-center border-gray-400 text-gray-700"
                   />
@@ -187,11 +231,41 @@ const ManualKontrol = () => {
                     onClick={handleInputConfirm}
                     className="px-4 py-2 bg-gray-500 text-white font-bold rounded-lg hover:bg-gray-600 transition-all"
                   >
-                    Set Watt
+                    Set Speed
                   </button>
                 </div>
               </div>
             </div>
+          )}
+
+          {mode === "auto" && status === "ON" && (
+              <div className="w-full bg-gray-100 p-6 rounded-lg shadow-lg border border-gray-300 text-center">
+                <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+                  Target: {target} mg/L
+                </h2>
+
+                <div className="mt-4 flex flex-col items-center gap-4">
+                  <h2 className="text-xl font-semibold text-gray-700">
+                    Input Setpoint Dissolved Oxygen
+                  </h2>
+                  <div className="flex items-center gap-4">
+                    <input
+                        type="number"
+                        min="3"
+                        max="10"
+                        value={inputTarget}
+                        onChange={handleTargetChange}
+                        className="p-2 border rounded w-20 text-center border-gray-400 text-gray-700"
+                    />
+                    <button
+                        onClick={handleTargetConfirm}
+                        className="px-4 py-2 bg-gray-500 text-white font-bold rounded-lg hover:bg-gray-600 transition-all"
+                    >
+                      Set
+                    </button>
+                  </div>
+                </div>
+              </div>
           )}
         </div>
 
@@ -246,7 +320,7 @@ const ManualKontrol = () => {
                 ? `Mode → ${pendingChange.value}`
                 : pendingChange.type === "status"
                 ? `Status → ${pendingChange.value}`
-                : `Watt → ${pendingChange.value}`}
+                : `Speed → ${pendingChange.value}`}
               ?
             </p>
             <div className="flex justify-center gap-4">
