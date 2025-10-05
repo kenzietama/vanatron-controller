@@ -4,7 +4,8 @@ import { Bell, X } from "lucide-react";
 import { io } from "socket.io-client";
 import axios from "axios";
 
-const socket = io("http://localhost:5000", { withCredentials: true });
+// const socket = io("http://localhost:5000", { withCredentials: true });
+const socket = io("http://localhost:5000");
 
 const NotificationDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);

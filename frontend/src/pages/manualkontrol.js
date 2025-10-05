@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import Header from "../component/header";
 import { useControlStore } from "../store/useControlStore";
+import {Loader} from "lucide-react";
 
 const ManualKontrol = () => {
   const { settings, isSettingsLoading, isSettingsUpdating, getSettings, setSettings } = useControlStore();
@@ -16,18 +17,8 @@ const ManualKontrol = () => {
 
   const akunAktif = "Admin1"; // bisa diganti sesuai sistem login
 
-  useEffect(() => {
+  useEffect(()  => {
     getSettings();
-
-    // setRiwayat((prev) => [
-    //   ...prev,
-    //   {
-    //     akun: settings.createdBy.name,
-    //     waktu: createdAt,
-    //     perubahan: `Target: ${oldTarget} → ${pendingChange.value}`,
-    //     mode: mode,
-    //   },
-    // ]);
   }, []);
 
   // handle perubahan mode
@@ -285,14 +276,22 @@ const ManualKontrol = () => {
                 </tr>
               </thead>
               <tbody>
-                {riwayat.length === 0 ? (
+                {!riwayat.length && !isSettingsLoading ? (
                   <tr>
                     <td colSpan="4" className="text-center py-4 text-gray-500">
                       Belum ada perubahan
                     </td>
                   </tr>
+                ) : isSettingsLoading ? (
+                    <tr>
+                      <td colSpan="4" className="py-4">
+                        <div className="flex items-center text-center justify-center">
+                          <Loader className="size-8 animate-spin"/>
+                        </div>
+                      </td>
+                    </tr>
                 ) : (
-                  riwayat.map((item, index) => (
+                    riwayat.map((item, index) => (
                     <tr key={index} className="hover:bg-gray-100">
                       <td className="border px-4 py-2">{item.akun}</td>
                       <td className="border px-4 py-2">{item.waktu}</td>
