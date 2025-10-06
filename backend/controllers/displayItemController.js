@@ -4,7 +4,7 @@ const Parameter = require("../models/parameter");
 const mongoose = require("mongoose")
 
 const addDisplayItem = async (req, res) => {
-    const {sensor, device, parameter, displayName} = req.body
+    const {sensor, device, parameter, displayName, maxValue, minValue} = req.body
     try {
         const exist = await displayItem.findOne({sensor: sensor, device: device, parameter: parameter})
         if (exist) {

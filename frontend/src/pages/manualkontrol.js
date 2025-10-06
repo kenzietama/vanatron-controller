@@ -1,19 +1,23 @@
 import React, {useEffect, useState} from "react";
 import Header from "../component/header";
 import { useControlStore } from "../store/useControlStore";
-import {Loader, ChevronLeft, ChevronRight} from "lucide-react";
+import {Loader, ChevronLeft, ChevronRight, AlertTriangle} from "lucide-react";
+import toast from "react-hot-toast";
 
 const ManualKontrol = () => {
   const {
     settings,
     history,
     pagination,
+    vfdData,
     isSettingsLoading,
     isHistoryLoading,
     isUpdatingSetting,
     getSettings,
     setSettings,
-    getHistory
+    getHistory,
+    subscribeToVFD,
+    unsubscribeFromVFD
   } = useControlStore();
 
   const [speed, setSpeed] = useState(50);
@@ -26,6 +30,13 @@ const ManualKontrol = () => {
   const [tempSpeed, setTempSpeed] = useState(50);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
+  // Safety constants
+  const MIN_POWER = 30;
+  const MAX_POWER = 100;
+  const MIN_DO = 4;
+  const MAX_DO = 10;
+  const MAX_FREQUENCY_HZ = 50; // Maximum VFD frequency in Hz
+
   useEffect(() => {
     const loadInitialData = async () => {
       setIsInitialLoading(true);
@@ -37,6 +48,14 @@ const ManualKontrol = () => {
     };
 
     loadInitialData();
+
+    // Subscribe to VFD data
+    subscribeToVFD();
+
+    // Cleanup on unmount
+    return () => {
+      unsubscribeFromVFD();
+    };
   }, []);
 
   // Sync state with settings
@@ -70,6 +89,11 @@ const ManualKontrol = () => {
 
   const handleSliderRelease = () => {
     if (tempSpeed !== speed) {
+      if (tempSpeed < MIN_POWER) {
+        toast.error(`Power must be at least ${MIN_POWER}% for safety`);
+        setTempSpeed(speed);
+        return;
+      }
       setPendingChange({ type: "speed", value: tempSpeed });
     }
   };
@@ -84,16 +108,48 @@ const ManualKontrol = () => {
 
   const handleInputConfirm = () => {
     const newSpeed = parseInt(inputSpeed, 10);
-    if (!isNaN(newSpeed) && newSpeed >= 0 && newSpeed <= 100) {
-      setPendingChange({ type: "speed", value: newSpeed });
+
+    if (isNaN(newSpeed)) {
+      toast.error("Please enter a valid number");
+      return;
     }
+
+    if (newSpeed < MIN_POWER) {
+      toast.error(`Power must be at least ${MIN_POWER}% for safety`);
+      setInputSpeed(speed);
+      return;
+    }
+
+    if (newSpeed > MAX_POWER) {
+      toast.error(`Power cannot exceed ${MAX_POWER}%`);
+      setInputSpeed(speed);
+      return;
+    }
+
+    setPendingChange({ type: "speed", value: newSpeed });
   };
 
   const handleTargetConfirm = () => {
     const newTarget = parseFloat(inputTarget);
-    if (!isNaN(newTarget) && newTarget >= 0 && newTarget <= 100) {
-      setPendingChange({ type: "target", value: newTarget });
+
+    if (isNaN(newTarget)) {
+      toast.error("Please enter a valid number");
+      return;
     }
+
+    if (newTarget < MIN_DO) {
+      toast.error(`DO set point must be at least ${MIN_DO} mg/L for safety`);
+      setInputTarget(target);
+      return;
+    }
+
+    if (newTarget > MAX_DO) {
+      toast.error(`DO set point cannot exceed ${MAX_DO} mg/L`);
+      setInputTarget(target);
+      return;
+    }
+
+    setPendingChange({ type: "target", value: newTarget });
   };
 
   const handleConfirmChange = async () => {
@@ -129,8 +185,26 @@ const ManualKontrol = () => {
       newSettings.state = pendingChange.value;
     }
 
-    await setSettings(newSettings);
-    setPendingChange(null);
+    try {
+      await setSettings(newSettings);
+      setPendingChange(null);
+    } catch (error) {
+      if (pendingChange.type === "speed") {
+        setSpeed(settings.power_set_point);
+        setInputSpeed(settings.power_set_point);
+        setTempSpeed(settings.power_set_point);
+      }
+      if (pendingChange.type === "target") {
+        setTarget(settings.do_set_point);
+        setInputTarget(settings.do_set_point);
+      }
+      if (pendingChange.type === "mode") {
+        setMode(settings.mode);
+      }
+      if (pendingChange.type === "status") {
+        setStatus(settings.state);
+      }
+    }
   };
 
   const handleCancelChange = () => {
@@ -155,7 +229,33 @@ const ManualKontrol = () => {
     });
   };
 
-  // Loading skeleton for control section
+  // Convert Hz to Percentage (0-50Hz -> 0-100%)
+  const convertHzToPercentage = (frequencyHz) => {
+    if (frequencyHz === null || frequencyHz === undefined) return null;
+    return ((frequencyHz / MAX_FREQUENCY_HZ) * 100).toFixed(1);
+  };
+
+  // Get current running frequency from VFD and convert to percentage
+  const getCurrentFrequency = () => {
+    if (status === "off") return "OFF";
+    if (!vfdData || vfdData.running_frequency === null || vfdData.running_frequency === undefined) {
+      return "---";
+    }
+    const percentage = convertHzToPercentage(vfdData.running_frequency);
+    return `${percentage} %`;
+  };
+
+  // Get frequency info for display (shows both Hz and %)
+  const getFrequencyInfo = () => {
+    if (status === "off" || !vfdData || vfdData.running_frequency === null || vfdData.running_frequency === undefined) {
+      return null;
+    }
+    return {
+      hz: vfdData.running_frequency.toFixed(1),
+      percentage: convertHzToPercentage(vfdData.running_frequency)
+    };
+  };
+
   const ControlSkeleton = () => (
       <div className="flex flex-col items-center border-2 border-gray-400 p-6 rounded-lg bg-white shadow-lg w-full max-w-2xl animate-pulse">
         <div className="h-8 bg-gray-300 rounded w-64 mb-6"></div>
@@ -177,7 +277,6 @@ const ManualKontrol = () => {
       </div>
   );
 
-  // Full page loading state
   if (isInitialLoading) {
     return (
         <div className="flex flex-col h-screen bg-[#F9F4F4]">
@@ -186,12 +285,8 @@ const ManualKontrol = () => {
               databaseName="Database / Manual Kontrol"
               notifications={3}
           />
-
           <div className="flex flex-1 flex-col items-center justify-start p-6">
-            {/* Control Section Skeleton */}
             <ControlSkeleton />
-
-            {/* History Table Skeleton */}
             <div className="mt-8 w-full max-w-6xl">
               <div className="h-8 bg-gray-300 rounded w-48 mb-4 animate-pulse"></div>
               <div className="overflow-x-auto border border-gray-300 rounded-lg shadow bg-white">
@@ -209,6 +304,8 @@ const ManualKontrol = () => {
     );
   }
 
+  const frequencyInfo = getFrequencyInfo();
+
   return (
       <div className="flex flex-col h-screen bg-[#F9F4F4]">
         <Header
@@ -218,10 +315,28 @@ const ManualKontrol = () => {
         />
 
         <div className="flex flex-1 flex-col items-center justify-start p-6">
+          {/* Safety Notice */}
+          <div className="w-full max-w-2xl mb-4">
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+              <div className="flex items-start">
+                <AlertTriangle className="h-5 w-5 text-yellow-400 mt-0.5 mr-3 flex-shrink-0" />
+                <div className="text-sm text-yellow-700">
+                  <p className="font-semibold mb-1">Safety Thresholds Active:</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>Minimum Power Set Point: <strong>{MIN_POWER}%</strong></li>
+                    <li>Maximum Power Set Point: <strong>{MAX_POWER}%</strong></li>
+                    <li>Minimum DO Set Point: <strong>{MIN_DO} mg/L</strong></li>
+                    <li>Maximum DO Set Point: <strong>{MAX_DO} mg/L</strong></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Kontrol */}
           <div className="flex flex-col items-center border-2 border-gray-400 p-6 rounded-lg bg-white shadow-lg w-full max-w-2xl">
             <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-              Kontrol Speed Turbin
+              Kontrol Kecepatan Turbin
             </h1>
 
             {/* Tombol ON / OFF */}
@@ -261,26 +376,53 @@ const ManualKontrol = () => {
               </button>
             </div>
 
-            {/* Tampilan Speed */}
-            <div className="w-full h-20 bg-gray-200 border border-gray-400 rounded-lg flex items-center justify-center text-4xl font-bold text-gray-700 mb-6">
-              {isSettingsLoading ? (
-                  <Loader className="size-10 animate-spin text-gray-500" />
-              ) : (
-                  status === "on" ? `${tempSpeed} %` : "OFF"
+            {/* Tampilan Speed - Real-time VFD Running Frequency */}
+            <div className="w-full mb-6">
+              <div className="text-center mb-2">
+                <p className="text-sm text-gray-600 font-semibold">Kecepatan Aktual (Real-time)</p>
+              </div>
+              <div className="w-full h-20 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-400 rounded-lg flex items-center justify-center text-4xl font-bold text-blue-700 shadow-inner">
+                {isSettingsLoading ? (
+                    <Loader className="size-10 animate-spin text-blue-500" />
+                ) : (
+                    getCurrentFrequency()
+                )}
+              </div>
+              {status === "on" && frequencyInfo && (
+                  <div className="text-center mt-2 space-y-1">
+                    <p className="text-sm text-gray-600">
+                      <span className="font-semibold">Frequency:</span> {frequencyInfo.hz} Hz ({frequencyInfo.percentage}%)
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Last updated: {vfdData.createdAt ? new Date(vfdData.createdAt).toLocaleTimeString('id-ID') : 'N/A'}
+                    </p>
+                  </div>
               )}
             </div>
+
+            {/* Target Speed Display */}
+            {mode === "manual" && status === "on" && (
+            <div className="w-full mb-6">
+              <div className="text-center mb-2">
+                <p className="text-sm text-gray-600 font-semibold">Target Kecepatan</p>
+              </div>
+              <div className="w-full h-16 bg-gray-200 border border-gray-400 rounded-lg flex items-center justify-center text-3xl font-bold text-gray-700">
+                {status === "on" ? `${tempSpeed} %` : "OFF"}
+              </div>
+            </div>
+            )}
 
             {/* Kontrol Speed - Manual Mode */}
             {mode === "manual" && status === "on" && (
                 <div className="w-full bg-gray-100 p-6 rounded-lg shadow-lg border border-gray-300 text-center">
                   <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-                    Kecepatan: {tempSpeed} %
+                    Atur Target Kecepatan:
                   </h2>
 
                   <input
                       type="range"
-                      min="0"
-                      max="100"
+                      min={MIN_POWER}
+                      max={MAX_POWER}
                       value={tempSpeed}
                       onChange={handleSliderChange}
                       onMouseUp={handleSliderRelease}
@@ -289,6 +431,11 @@ const ManualKontrol = () => {
                       className="w-full cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   />
 
+                  <div className="text-xs text-gray-500 mt-2 flex justify-between">
+                    <span>Min: {MIN_POWER}%</span>
+                    <span>Max: {MAX_POWER}%</span>
+                  </div>
+
                   <div className="mt-4 flex flex-col items-center gap-4">
                     <h2 className="text-xl font-semibold text-gray-700">
                       Input Manual Kecepatan
@@ -296,8 +443,8 @@ const ManualKontrol = () => {
                     <div className="flex items-center gap-4">
                       <input
                           type="number"
-                          min="0"
-                          max="100"
+                          min={MIN_POWER}
+                          max={MAX_POWER}
                           value={inputSpeed}
                           onChange={handleInputChange}
                           disabled={isUpdatingSetting}
@@ -311,6 +458,7 @@ const ManualKontrol = () => {
                         Set Speed
                       </button>
                     </div>
+                    <p className="text-xs text-gray-500">Range: {MIN_POWER}% - {MAX_POWER}%</p>
                   </div>
                 </div>
             )}
@@ -319,7 +467,7 @@ const ManualKontrol = () => {
             {mode === "auto" && status === "on" && (
                 <div className="w-full bg-gray-100 p-6 rounded-lg shadow-lg border border-gray-300 text-center">
                   <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-                    Target: {target} mg/L
+                    Target DO: {target} mg/L
                   </h2>
 
                   <div className="mt-4 flex flex-col items-center gap-4">
@@ -329,8 +477,8 @@ const ManualKontrol = () => {
                     <div className="flex items-center gap-4">
                       <input
                           type="number"
-                          min="3"
-                          max="10"
+                          min={MIN_DO}
+                          max={MAX_DO}
                           step="0.1"
                           value={inputTarget}
                           onChange={handleTargetChange}
@@ -345,6 +493,7 @@ const ManualKontrol = () => {
                         Set
                       </button>
                     </div>
+                    <p className="text-xs text-gray-500">Range: {MIN_DO} - {MAX_DO} mg/L</p>
                   </div>
                 </div>
             )}

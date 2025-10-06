@@ -5,7 +5,7 @@ const getControl = async (req, res) => {
         const response = await controlSystem
             .findOne()
             .sort({ createdAt: -1 })
-            .populate('createdBy', 'name'); // Latest first
+            .populate('createdBy', 'name');
         if (!response) {
             return res.status(404).json({ error: 'No control settings found' });
         }
@@ -46,15 +46,42 @@ const getControlHistory = async (req, res) => {
 
 const setControl = async (req, res) => {
     const { state, mode, power_set_point, do_set_point } = req.body;
+
+    // Check required fields
     if (state === undefined || mode === undefined || power_set_point === undefined || do_set_point === undefined) {
         return res.status(400).json({ error: 'Missing required fields: state, mode, power_set_point, do_set_point' });
+    }
+
+    // Convert to numbers
+    const powerValue = Number(power_set_point);
+    const doValue = Number(do_set_point);
+
+    // Additional safety validation
+    if (isNaN(powerValue) || isNaN(doValue)) {
+        return res.status(400).json({ error: 'power_set_point and do_set_point must be valid numbers' });
+    }
+
+    if (powerValue < 30) {
+        return res.status(400).json({ error: 'Power set point must be at least 30% for safety reasons' });
+    }
+
+    if (powerValue > 100) {
+        return res.status(400).json({ error: 'Power set point cannot exceed 100%' });
+    }
+
+    if (doValue < 4) {
+        return res.status(400).json({ error: 'DO set point must be at least 4 mg/L for safety reasons' });
+    }
+
+    if (doValue > 10) {
+        return res.status(400).json({ error: 'DO set point cannot exceed 10 mg/L' });
     }
 
     const settings = {
         state,
         mode,
-        power_set_point: Number(power_set_point),
-        do_set_point: Number(do_set_point),
+        power_set_point: powerValue,
+        do_set_point: doValue,
         createdBy: req.account._id,
     };
 
