@@ -1,7 +1,5 @@
-// File: Dashboard.js
 import React from "react";
 import Header from "../component/header";
-import ImageSlider from "../component/slide";
 import galeri1 from "../gambar/galeri1.jpg";
 import vaname from "../gambar/vaname.jpg";
 import rangkaian from "../gambar/rangkaian.png";
@@ -17,35 +15,35 @@ const Dashboard = () => {
       />
 
       {/* Hero Section */}
-      <section className="text-center py-12 bg-gradient-to-r from-cyan-100 to-blue-200 shadow-md">
-        <h1 className="text-5xl font-extrabold text-gray-800 drop-shadow-lg">
+      <section className="text-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-cyan-100 to-blue-200 shadow-md">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-800 drop-shadow-lg leading-tight">
           Selamat Datang di Smart Tambak Udang Vaname
         </h1>
-        <p className="text-xl font-medium text-gray-600 mt-3">
+        <p className="text-lg sm:text-xl font-medium text-gray-600 mt-3">
           Pemantauan cerdas dengan energi terbarukan – Pemalang
         </p>
       </section>
 
       {/* Rangkaian Alat */}
-      <section className="px-8 py-10 text-center">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6">
+      <section className="px-4 sm:px-8 py-10 text-center">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">
           Rangkaian Sistem
         </h2>
         <img
           src={rangkaian}
           alt="Rangkaian Sistem"
-          className="rounded-2xl shadow-lg mx-auto w-3/4"
+          className="rounded-2xl shadow-lg mx-auto w-full sm:w-4/5 lg:w-3/4 object-contain"
         />
       </section>
 
       {/* Latar Belakang + Video */}
-      <section className="px-8 py-12 bg-white flex flex-col md:flex-row items-center gap-8">
+      <section className="px-4 sm:px-8 py-12 bg-white flex flex-col md:flex-row items-center gap-8">
         {/* Teks */}
         <div className="md:w-1/2 text-left">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">
             Latar Belakang
           </h2>
-          <p className="text-lg text-gray-600 leading-relaxed">
+          <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
             Tambak udang vaname membutuhkan sistem pemantauan yang efisien agar
             kualitas air tetap terjaga dan hasil panen optimal. Dengan
             menggabungkan teknologi IoT dan energi terbarukan, sistem ini
@@ -54,7 +52,7 @@ const Dashboard = () => {
           </p>
         </div>
         {/* Video */}
-        <div className="md:w-1/2 h-[300px] md:h-[350px]">
+        <div className="md:w-1/2 w-full h-60 sm:h-72 md:h-80 lg:h-96">
           <iframe
             className="w-full h-full rounded-2xl shadow-lg"
             src="https://www.youtube.com/embed/dQw4w9WgXcQ"
@@ -67,21 +65,13 @@ const Dashboard = () => {
       </section>
 
       {/* Tentang Udang Vaname */}
-      <section className="px-8 py-12 bg-gradient-to-r from-gray-100 to-gray-200 flex flex-col md:flex-row items-center gap-8">
-        {/* Gambar */}
-        <div className="md:w-1/2">
-          <img
-            src={vaname}
-            alt="Udang Vaname"
-            className="rounded-2xl shadow-lg w-full object-cover"
-          />
-        </div>
+      <section className="px-4 sm:px-8 py-12 bg-gradient-to-r from-gray-100 to-gray-200 flex flex-col md:flex-row items-center gap-8">
         {/* Penjelasan */}
         <div className="md:w-1/2 text-left">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">
             Mengenal Udang Vaname
           </h2>
-          <p className="text-lg text-gray-600 leading-relaxed">
+          <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
             Udang Vaname (Litopenaeus vannamei) adalah salah satu komoditas
             unggulan budidaya perikanan. Pertumbuhannya cepat, tahan penyakit,
             dan memiliki permintaan pasar yang tinggi baik dalam negeri maupun
@@ -89,27 +79,26 @@ const Dashboard = () => {
             Indonesia.
           </p>
         </div>
+        {/* Gambar */}
+        <div className="md:w-1/2 w-full">
+          <img
+            src={vaname}
+            alt="Udang Vaname"
+            className="rounded-2xl shadow-lg w-full h-64 sm:h-80 md:h-full object-cover"
+          />
+        </div>
       </section>
 
       {/* Galeri Sistem */}
-      <section className="px-8 py-10">
-        <h2 className="text-3xl font-bold text-gray-1000 text-center mb-8">
+      <section className="px-4 sm:px-8 py-10">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center mb-8">
           Galeri Sistem
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {[
-            {
-              src: galeri1,
-              label: "Panel Surya",
-            },
-            {
-              src: galeri1,
-              label: "Turbin Air",
-            },
-            {
-              src: galeri1,
-              label: "Kontrol IoT",
-            },
+            { src: galeri1, label: "Panel Surya" },
+            { src: galeri1, label: "Turbin Air" },
+            { src: galeri1, label: "Kontrol IoT" },
           ].map((item, i) => (
             <div
               key={i}
@@ -118,7 +107,7 @@ const Dashboard = () => {
               <img
                 src={item.src}
                 alt={item.label}
-                className="w-full h-48 object-cover"
+                className="w-full h-48 sm:h-56 object-cover"
               />
               <p className="text-center font-semibold text-gray-700 py-3">
                 {item.label}
@@ -129,7 +118,7 @@ const Dashboard = () => {
       </section>
 
       {/* Footer */}
-      <footer className="text-center py-6 text-gray-600 text-sm">
+      <footer className="text-center py-6 text-gray-600 text-sm px-4">
         © 2025 Sistem Monitoring Tambak Udang – Energi Terbarukan
       </footer>
     </div>

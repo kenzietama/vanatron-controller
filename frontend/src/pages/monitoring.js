@@ -37,33 +37,45 @@ const Monitoring = () => {
   };
 
   return (
-    <div className="flex h-fullscreen bg-[#F9F4F4]">
+    <div className="flex min-h-screen bg-[#F9F4F4]">
       <div className="flex-1 flex flex-col">
+        {/* Header */}
         <Header
           pageName="Monitoring"
           databaseName="Database / Monitoring"
           notifications={0}
         />
 
-        <div className="p-4 flex flex-col gap-4">
-          {/* Map */}
-          <div className="bg-white p-4 rounded-lg shadow">
+        <div className="p-4 sm:p-6 md:p-8 flex flex-col gap-6">
+          {/* Map Section */}
+          <div className="bg-white p-3 sm:p-4 rounded-xl shadow-md">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3165.4995481261174!2d109.46853107460685!3d-6.830255646756649!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e705c9ae10d9799%3A0xf0f4bc354d0d2b40!2sTambak%20Udang%20Prima%20Sukses%20Bersama!5e0!3m2!1sen!2sid!4v1234567890123"
               width="100%"
-              height="300"
+              height="250"
               style={{ border: 0 }}
-              allowFullScreen="true"
+              allowFullScreen
               loading="lazy"
+              className="rounded-lg"
+              title="Lokasi Tambak Udang"
             ></iframe>
           </div>
 
-          {/* Sensor Data */}
+          {/* Sensor Data Section */}
           <div>
             {isValueLoading || isGraphLoading ? (
-              <p>loading</p>
+              <div className="text-center text-gray-500 py-6">Memuat data sensor...</div>
             ) : (
-              <div className="grid grid-cols-4 gap-4">
+              <div
+                className="
+                  grid 
+                  grid-cols-1 
+                  sm:grid-cols-2 
+                  lg:grid-cols-3 
+                  xl:grid-cols-4 
+                  gap-4
+                "
+              >
                 {latestData && latestData.length > 0 ? (
                   latestData.map((data, index) => (
                     <CardSensor
@@ -81,7 +93,9 @@ const Monitoring = () => {
                     />
                   ))
                 ) : (
-                  <div>Not found</div>
+                  <div className="col-span-full text-center text-gray-600 py-4">
+                    Data sensor tidak ditemukan.
+                  </div>
                 )}
               </div>
             )}
