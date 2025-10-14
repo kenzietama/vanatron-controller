@@ -32,7 +32,7 @@ const port = 5000;
 
 // Middleware
 app.use(cors({
-    origin: ["http://localhost:3000", "http://192.168.18.11:3000", "http://192.168.18.166:3000"],
+    origin: ["http://localhost:3000", "https://vanatron.kenzietama.site:3000"],
     credentials: true
 })); // Menangani masalah CORS
 app.use(express.json()); // Menangani parsing JSON
@@ -63,7 +63,7 @@ app.use("/api/notifications", notificationRoutes)
 
 app.use("/api/custom", customRoutes)
 
-server.listen(port, 'localhost', () => {
+server.listen(port, '0.0.0.0', () => {
     console.log(`Express server started on port ${port}`)
     mongoose
         // .connect("mongodb://localhost:27017/capstone")

@@ -24,7 +24,7 @@ const SensorParameterAdd = () => {
   useEffect(() => {
     const fetchSensors = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/sensors");
+        const response = await axios.get(process.env.REACT_APP_BACKEND_URL + "/api/sensors");
         setSensorOptions(response.data);
       } catch (error) {
         console.error("Error fetching sensors:", error);
@@ -48,10 +48,10 @@ const SensorParameterAdd = () => {
     setFormData({ ...formData, sensor: e.target.value });
     try {
       const device = await axios.get(
-        `http://localhost:5000/api/sensors/${e.target.value}/devices`
+        process.env.REACT_APP_BACKEND_URL + "/api/sensors/${e.target.value}/devices"
       );
       const parameter = await axios.get(
-        `http://localhost:5000/api/parameters/${e.target.value}`
+        process.env.REACT_APP_BACKEND_URL + "/api/parameters/${e.target.value}"
       );
       setDeviceOptions(device.data);
       setParameterOptions(parameter.data);
@@ -63,7 +63,7 @@ const SensorParameterAdd = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/api/displayitems", formData);
+      await axios.post(process.env.REACT_APP_BACKEND_URL + "/api/displayitems", formData);
       navigate("/sensor&parameter");
     } catch (error) {
       if (error.status === 409) {

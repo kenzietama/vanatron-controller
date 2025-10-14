@@ -15,7 +15,7 @@ const UserAdmin = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/accounts");
+        const response = await fetch(process.env.REACT_APP_BACKEND_URL + "/api/accounts");
         const data = await response.json();
         setUsersData(data);
       } catch (error) {
@@ -44,7 +44,7 @@ const UserAdmin = () => {
     if (userToDelete) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/accounts/${userToDelete}`,
+          process.env.REACT_APP_BACKEND_URL + "/api/accounts/${userToDelete}",
           { method: "DELETE" }
         );
         if (response.ok) {

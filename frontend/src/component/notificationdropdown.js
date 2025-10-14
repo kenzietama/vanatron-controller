@@ -4,8 +4,8 @@ import { Bell, X } from "lucide-react";
 import { io } from "socket.io-client";
 import axios from "axios";
 
-// const socket = io("http://localhost:5000", { withCredentials: true });
-const socket = io("http://localhost:5000");
+// const socket = io("process.env.REACT_APP_BACKEND_URL", { withCredentials: true });
+const socket = io(process.env.REACT_APP_BACKEND_URL);
 
 const NotificationDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,7 +14,7 @@ const NotificationDropdown = () => {
 
   // Load awal notifikasi dari backend
   useEffect(() => {
-    axios.get("http://localhost:5000/api/notifications").then((res) => {
+    axios.get(process.env.REACT_APP_BACKEND_URL + "/api/notifications").then((res) => {
       setNotifications(res.data);
     });
 

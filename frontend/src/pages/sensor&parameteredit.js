@@ -28,7 +28,7 @@ const EditSensorParameter = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`http://localhost:5000/api/displayitems/${_id}`);
+        const response = await axios.get(process.env.REACT_APP_BACKEND_URL + "/api/displayitems/${_id}");
         const data = response.data;
         setFormData({
           sensor: data.sensor,
@@ -54,11 +54,11 @@ const EditSensorParameter = () => {
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const sensorResponse = await axios.get("http://localhost:5000/api/sensors");
+        const sensorResponse = await axios.get(process.env.REACT_APP_BACKEND_URL + "/api/sensors");
         setSensorOptions(sensorResponse.data);
         if (formData.sensor) {
-          const deviceResponse = await axios.get(`http://localhost:5000/api/sensors/${formData.sensor}/devices`);
-          const parameterResponse = await axios.get(`http://localhost:5000/api/parameters/${formData.sensor}`);
+          const deviceResponse = await axios.get(process.env.REACT_APP_BACKEND_URL + "/api/sensors/${formData.sensor}/devices");
+          const parameterResponse = await axios.get(process.env.REACT_APP_BACKEND_URL + "/api/parameters/${formData.sensor}");
           setDeviceOptions(deviceResponse.data);
           setParameterOptions(parameterResponse.data);
         }
@@ -77,7 +77,7 @@ const EditSensorParameter = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/displayitems/${_id}`, formData);
+      await axios.put(process.env.REACT_APP_BACKEND_URL + "/api/displayitems/${_id}", formData);
       navigate("/sensor&parameter");
     } catch (error) {
       console.error("Error updating parameter:", error);

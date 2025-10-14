@@ -27,7 +27,7 @@ const EditUserAdmin = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`http://localhost:5000/api/accounts/${_id}`);
+        const response = await fetch(process.env.REACT_APP_BACKEND_URL + "/api/accounts/${_id}");
         if (!response.ok) throw new Error("Failed to fetch user data");
         const user = await response.json();
         setPhoto(user.photo || null);
@@ -74,7 +74,7 @@ const EditUserAdmin = () => {
     if (password) updatedUser.password = password;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/accounts/${_id}`, {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL + "/api/accounts/${_id}", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedUser),

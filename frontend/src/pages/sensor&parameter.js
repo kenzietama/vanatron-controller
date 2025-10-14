@@ -18,7 +18,7 @@ const SensorParameter = () => {
     const fetchSensorsData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("http://localhost:5000/api/displayitems/");
+        const response = await axios.get(process.env.REACT_APP_BACKEND_URL + "/api/displayitems/");
         setDisplayItems(response.data);
       } catch (error) {
         console.error("Error fetching sensors:", error);
@@ -39,7 +39,7 @@ const SensorParameter = () => {
   const handleDeleteData = async () => {
     if (!selectedItem) return;
     try {
-      const response = await axios.delete(`http://localhost:5000/api/displayitems/${selectedItem}`);
+      const response = await axios.delete(process.env.REACT_APP_BACKEND_URL + "/api/displayitems/${selectedItem}");
       if (response.status === 200) {
         setDisplayItems(displayItems.filter((sensor) => sensor._id !== selectedItem));
         setModalMessage("Sensor deleted successfully!");
@@ -64,7 +64,7 @@ const SensorParameter = () => {
 
   const updateSensors = async () => {
     try {
-      await axios.get("http://localhost:5000/api/sensors/update");
+      await axios.get(process.env.REACT_APP_BACKEND_URL + "/api/sensors/update");
     } catch (error) {
       console.error("Error updating sensors:", error);
     }

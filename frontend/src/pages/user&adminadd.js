@@ -43,7 +43,7 @@ const CreateUserAdmin = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/accounts/add", {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL + "/api/accounts/add", {
         method: "POST",
         body: formData,
       });
