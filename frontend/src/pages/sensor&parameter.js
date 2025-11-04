@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../component/header";
 import axios from "axios";
@@ -39,7 +39,7 @@ const SensorParameter = () => {
   const handleDeleteData = async () => {
     if (!selectedItem) return;
     try {
-      const response = await axios.delete(process.env.REACT_APP_BACKEND_URL + "/api/displayitems/${selectedItem}");
+      const response = await axios.delete(process.env.REACT_APP_BACKEND_URL + `/api/displayitems/${selectedItem}`);
       if (response.status === 200) {
         setDisplayItems(displayItems.filter((sensor) => sensor._id !== selectedItem));
         setModalMessage("Sensor deleted successfully!");
@@ -86,7 +86,7 @@ const SensorParameter = () => {
 
   return (
     <div className="flex min-h-screen bg-[#F9F4F4]">
-      <div className="flex-1 flex flex-col">
+      <div className="flex flex-col flex-1">
         {/* Header */}
         <Header
           pageName="Sensor & Parameter"
@@ -95,10 +95,10 @@ const SensorParameter = () => {
         />
 
         <div className="flex-1 p-6">
-          <div className="bg-white shadow-lg rounded-lg border border-gray-300 p-6 mb-6">
+          <div className="p-6 mb-6 bg-white border border-gray-300 rounded-lg shadow-lg">
             {/* 🔍 Search + Add */}
-            <div className="flex justify-between items-center mb-6 flex-col sm:flex-row space-y-3 sm:space-y-0">
-              <div className="w-full sm:w-1/2 relative">
+            <div className="flex flex-col items-center justify-between mb-6 space-y-3 sm:flex-row sm:space-y-0">
+              <div className="relative w-full sm:w-1/2">
                 <input
                   type="text"
                   placeholder="Search"
@@ -106,12 +106,12 @@ const SensorParameter = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full h-10 pl-4 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
                 />
-                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600" />
+                <Search className="absolute text-gray-600 transform -translate-y-1/2 right-3 top-1/2" />
               </div>
 
               <button
                 onClick={handleAdd}
-                className="w-full sm:w-48 px-6 py-2 bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600"
+                className="w-full px-6 py-2 font-semibold text-white bg-blue-500 rounded-full sm:w-48 hover:bg-blue-600"
               >
                 Add Data
               </button>
@@ -123,17 +123,17 @@ const SensorParameter = () => {
                 <p className="text-center text-gray-700">Loading data...</p>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="min-w-full border-collapse border border-gray-200 text-sm">
+                  <table className="min-w-full text-sm border border-collapse border-gray-200">
                     <thead className="bg-gray-200">
                       <tr>
-                        <th className="px-3 py-2 text-left font-semibold text-gray-700">Sensor</th>
-                        <th className="px-3 py-2 text-left font-semibold text-gray-700">Device</th>
-                        <th className="px-3 py-2 text-left font-semibold text-gray-700">Parameter</th>
-                        <th className="px-3 py-2 text-left font-semibold text-gray-700">Name</th>
-                        <th className="px-3 py-2 text-left font-semibold text-gray-700">Unit</th>
-                        <th className="px-3 py-2 text-left font-semibold text-gray-700">Min</th>
-                        <th className="px-3 py-2 text-left font-semibold text-gray-700">Max</th>
-                        <th className="px-3 py-2 text-center font-semibold text-gray-700">Action</th>
+                        <th className="px-3 py-2 font-semibold text-left text-gray-700">Sensor</th>
+                        <th className="px-3 py-2 font-semibold text-left text-gray-700">Device</th>
+                        <th className="px-3 py-2 font-semibold text-left text-gray-700">Parameter</th>
+                        <th className="px-3 py-2 font-semibold text-left text-gray-700">Name</th>
+                        <th className="px-3 py-2 font-semibold text-left text-gray-700">Unit</th>
+                        <th className="px-3 py-2 font-semibold text-left text-gray-700">Min</th>
+                        <th className="px-3 py-2 font-semibold text-left text-gray-700">Max</th>
+                        <th className="px-3 py-2 font-semibold text-center text-gray-700">Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -145,16 +145,16 @@ const SensorParameter = () => {
                               index % 2 === 0 ? "bg-gray-50" : "bg-white"
                             } hover:bg-gray-100`}
                           >
-                            <td className="px-3 py-2 whitespace-normal break-words">
+                            <td className="px-3 py-2 break-words whitespace-normal">
                               {data.sensor}
                             </td>
-                            <td className="px-3 py-2 whitespace-normal break-words">
+                            <td className="px-3 py-2 break-words whitespace-normal">
                               {data.device}
                             </td>
-                            <td className="px-3 py-2 whitespace-normal break-words">
+                            <td className="px-3 py-2 break-words whitespace-normal">
                               {data.parameter}
                             </td>
-                            <td className="px-3 py-2 whitespace-normal break-words">
+                            <td className="px-3 py-2 break-words whitespace-normal">
                               {data.displayName}
                             </td>
                             <td className="px-3 py-2">{data.unit}</td>
@@ -164,13 +164,13 @@ const SensorParameter = () => {
                               <div className="flex flex-col items-center space-y-2">
                                 <button
                                   onClick={() => handleEdit(data._id)}
-                                  className="px-3 py-1 w-24 bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600"
+                                  className="w-24 px-3 py-1 font-semibold text-white bg-blue-500 rounded-full hover:bg-blue-600"
                                 >
                                   Edit
                                 </button>
                                 <button
                                   onClick={() => confirmDelete(data._id)}
-                                  className="px-3 py-1 w-24 bg-red-500 text-white font-semibold rounded-full hover:bg-red-600"
+                                  className="w-24 px-3 py-1 font-semibold text-white bg-red-500 rounded-full hover:bg-red-600"
                                 >
                                   Delete
                                 </button>
@@ -192,12 +192,12 @@ const SensorParameter = () => {
             </div>
 
             {/* 🔹 Card Mobile */}
-            <div className="sm:hidden space-y-4">
+            <div className="space-y-4 sm:hidden">
               {filteredData.length > 0 ? (
                 filteredData.map((data) => (
                   <div
                     key={data._id}
-                    className="border border-gray-300 rounded-lg p-4 bg-white shadow-sm"
+                    className="p-4 bg-white border border-gray-300 rounded-lg shadow-sm"
                   >
                     <p><strong>Sensor:</strong> {data.sensor}</p>
                     <p><strong>Device:</strong> {data.device}</p>
@@ -206,7 +206,7 @@ const SensorParameter = () => {
                     <p><strong>Unit:</strong> {data.unit}</p>
                     <p><strong>Min:</strong> {data.minValue ?? "-"}</p>
                     <p><strong>Max:</strong> {data.maxValue ?? "-"}</p>
-                    <div className="mt-4 flex justify-between">
+                    <div className="flex justify-between mt-4">
                       <button
                         onClick={() => handleEdit(data._id)}
                         className="px-3 py-1 bg-blue-500 text-white rounded-full w-[45%]"
@@ -231,8 +231,8 @@ const SensorParameter = () => {
 
         {/* 🔹 Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div className="bg-white rounded-lg p-6 w-80 sm:w-96">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="p-6 bg-white rounded-lg w-80 sm:w-96">
               <h3
                 className={`text-lg font-semibold ${
                   modalType === "success"
@@ -244,18 +244,18 @@ const SensorParameter = () => {
               >
                 {modalMessage}
               </h3>
-              <div className="mt-4 flex justify-end space-x-3">
+              <div className="flex justify-end mt-4 space-x-3">
                 {modalType === "info" && (
                   <button
                     onClick={handleDeleteData}
-                    className="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600"
+                    className="px-4 py-2 text-white bg-red-500 rounded-full hover:bg-red-600"
                   >
                     Confirm
                   </button>
                 )}
                 <button
                   onClick={handleCloseModal}
-                  className="px-4 py-2 bg-gray-500 text-white rounded-full hover:bg-gray-600"
+                  className="px-4 py-2 text-white bg-gray-500 rounded-full hover:bg-gray-600"
                 >
                   Close
                 </button>

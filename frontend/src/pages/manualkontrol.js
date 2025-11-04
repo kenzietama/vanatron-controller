@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import Header from "../component/header";
 import { useControlStore } from "../store/useControlStore";
 import {Loader, ChevronLeft, ChevronRight, AlertTriangle} from "lucide-react";
@@ -56,7 +56,7 @@ const ManualKontrol = () => {
     return () => {
       unsubscribeFromVFD();
     };
-  }, []);
+  }, [getHistory, getSettings, subscribeToVFD, unsubscribeFromVFD]);
 
   // Sync state with settings
   useEffect(() => {
@@ -257,21 +257,21 @@ const ManualKontrol = () => {
   };
 
   const ControlSkeleton = () => (
-      <div className="flex flex-col items-center border-2 border-gray-400 p-6 rounded-lg bg-white shadow-lg w-full max-w-2xl animate-pulse">
-        <div className="h-8 bg-gray-300 rounded w-64 mb-6"></div>
-        <div className="h-12 bg-gray-300 rounded w-32 mb-6"></div>
+      <div className="flex flex-col items-center w-full max-w-2xl p-6 bg-white border-2 border-gray-400 rounded-lg shadow-lg animate-pulse">
+        <div className="w-64 h-8 mb-6 bg-gray-300 rounded"></div>
+        <div className="w-32 h-12 mb-6 bg-gray-300 rounded"></div>
         <div className="flex gap-6 mb-6">
-          <div className="h-10 bg-gray-300 rounded w-24"></div>
-          <div className="h-10 bg-gray-300 rounded w-24"></div>
+          <div className="w-24 h-10 bg-gray-300 rounded"></div>
+          <div className="w-24 h-10 bg-gray-300 rounded"></div>
         </div>
-        <div className="w-full h-20 bg-gray-300 rounded-lg mb-6"></div>
-        <div className="w-full bg-gray-200 p-6 rounded-lg">
-          <div className="h-6 bg-gray-300 rounded w-48 mb-4 mx-auto"></div>
-          <div className="h-2 bg-gray-300 rounded w-full mb-4"></div>
-          <div className="h-6 bg-gray-300 rounded w-56 mb-2 mx-auto"></div>
-          <div className="flex items-center gap-4 justify-center">
-            <div className="h-10 bg-gray-300 rounded w-20"></div>
-            <div className="h-10 bg-gray-300 rounded w-24"></div>
+        <div className="w-full h-20 mb-6 bg-gray-300 rounded-lg"></div>
+        <div className="w-full p-6 bg-gray-200 rounded-lg">
+          <div className="w-48 h-6 mx-auto mb-4 bg-gray-300 rounded"></div>
+          <div className="w-full h-2 mb-4 bg-gray-300 rounded"></div>
+          <div className="w-56 h-6 mx-auto mb-2 bg-gray-300 rounded"></div>
+          <div className="flex items-center justify-center gap-4">
+            <div className="w-20 h-10 bg-gray-300 rounded"></div>
+            <div className="w-24 h-10 bg-gray-300 rounded"></div>
           </div>
         </div>
       </div>
@@ -285,11 +285,11 @@ const ManualKontrol = () => {
               databaseName="Database / Manual Kontrol"
               notifications={3}
           />
-          <div className="flex flex-1 flex-col items-center justify-start p-6">
+          <div className="flex flex-col items-center justify-start flex-1 p-6">
             <ControlSkeleton />
-            <div className="mt-8 w-full max-w-6xl">
-              <div className="h-8 bg-gray-300 rounded w-48 mb-4 animate-pulse"></div>
-              <div className="overflow-x-auto border border-gray-300 rounded-lg shadow bg-white">
+            <div className="w-full max-w-6xl mt-8">
+              <div className="w-48 h-8 mb-4 bg-gray-300 rounded animate-pulse"></div>
+              <div className="overflow-x-auto bg-white border border-gray-300 rounded-lg shadow">
                 <div className="p-4">
                   <div className="space-y-3">
                     {[...Array(5)].map((_, i) => (
@@ -314,15 +314,15 @@ const ManualKontrol = () => {
             notifications={3}
         />
 
-        <div className="flex flex-1 flex-col items-center justify-start p-6">
+        <div className="flex flex-col items-center justify-start flex-1 p-6">
           {/* Safety Notice */}
           <div className="w-full max-w-2xl mb-4">
-            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+            <div className="p-4 border-l-4 border-yellow-400 rounded bg-yellow-50">
               <div className="flex items-start">
                 <AlertTriangle className="h-5 w-5 text-yellow-400 mt-0.5 mr-3 flex-shrink-0" />
                 <div className="text-sm text-yellow-700">
-                  <p className="font-semibold mb-1">Safety Thresholds Active:</p>
-                  <ul className="list-disc list-inside space-y-1">
+                  <p className="mb-1 font-semibold">Safety Thresholds Active:</p>
+                  <ul className="space-y-1 list-disc list-inside">
                     <li>Minimum Power Set Point: <strong>{MIN_POWER}%</strong></li>
                     <li>Maximum Power Set Point: <strong>{MAX_POWER}%</strong></li>
                     <li>Minimum DO Set Point: <strong>{MIN_DO} mg/L</strong></li>
@@ -334,8 +334,8 @@ const ManualKontrol = () => {
           </div>
 
           {/* Kontrol */}
-          <div className="flex flex-col items-center border-2 border-gray-400 p-6 rounded-lg bg-white shadow-lg w-full max-w-2xl">
-            <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+          <div className="flex flex-col items-center w-full max-w-2xl p-6 bg-white border-2 border-gray-400 rounded-lg shadow-lg">
+            <h1 className="mb-6 text-3xl font-bold text-center text-gray-800">
               Kontrol Kecepatan Turbin
             </h1>
 
@@ -378,18 +378,18 @@ const ManualKontrol = () => {
 
             {/* Tampilan Speed - Real-time VFD Running Frequency */}
             <div className="w-full mb-6">
-              <div className="text-center mb-2">
-                <p className="text-sm text-gray-600 font-semibold">Kecepatan Aktual (Real-time)</p>
+              <div className="mb-2 text-center">
+                <p className="text-sm font-semibold text-gray-600">Kecepatan Aktual (Real-time)</p>
               </div>
-              <div className="w-full h-20 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-400 rounded-lg flex items-center justify-center text-4xl font-bold text-blue-700 shadow-inner">
+              <div className="flex items-center justify-center w-full h-20 text-4xl font-bold text-blue-700 border-2 border-blue-400 rounded-lg shadow-inner bg-gradient-to-br from-blue-50 to-blue-100">
                 {isSettingsLoading ? (
-                    <Loader className="size-10 animate-spin text-blue-500" />
+                    <Loader className="text-blue-500 size-10 animate-spin" />
                 ) : (
                     getCurrentFrequency()
                 )}
               </div>
               {status === "on" && frequencyInfo && (
-                  <div className="text-center mt-2 space-y-1">
+                  <div className="mt-2 space-y-1 text-center">
                     <p className="text-sm text-gray-600">
                       <span className="font-semibold">Frequency:</span> {frequencyInfo.hz} Hz ({frequencyInfo.percentage}%)
                     </p>
@@ -403,10 +403,10 @@ const ManualKontrol = () => {
             {/* Target Speed Display */}
             {mode === "manual" && status === "on" && (
             <div className="w-full mb-6">
-              <div className="text-center mb-2">
-                <p className="text-sm text-gray-600 font-semibold">Target Kecepatan</p>
+              <div className="mb-2 text-center">
+                <p className="text-sm font-semibold text-gray-600">Target Kecepatan</p>
               </div>
-              <div className="w-full h-16 bg-gray-200 border border-gray-400 rounded-lg flex items-center justify-center text-3xl font-bold text-gray-700">
+              <div className="flex items-center justify-center w-full h-16 text-3xl font-bold text-gray-700 bg-gray-200 border border-gray-400 rounded-lg">
                 {status === "on" ? `${tempSpeed} %` : "OFF"}
               </div>
             </div>
@@ -414,8 +414,8 @@ const ManualKontrol = () => {
 
             {/* Kontrol Speed - Manual Mode */}
             {mode === "manual" && status === "on" && (
-                <div className="w-full bg-gray-100 p-6 rounded-lg shadow-lg border border-gray-300 text-center">
-                  <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+                <div className="w-full p-6 text-center bg-gray-100 border border-gray-300 rounded-lg shadow-lg">
+                  <h2 className="mb-4 text-2xl font-semibold text-gray-700">
                     Atur Target Kecepatan:
                   </h2>
 
@@ -431,12 +431,12 @@ const ManualKontrol = () => {
                       className="w-full cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   />
 
-                  <div className="text-xs text-gray-500 mt-2 flex justify-between">
+                  <div className="flex justify-between mt-2 text-xs text-gray-500">
                     <span>Min: {MIN_POWER}%</span>
                     <span>Max: {MAX_POWER}%</span>
                   </div>
 
-                  <div className="mt-4 flex flex-col items-center gap-4">
+                  <div className="flex flex-col items-center gap-4 mt-4">
                     <h2 className="text-xl font-semibold text-gray-700">
                       Input Manual Kecepatan
                     </h2>
@@ -448,12 +448,12 @@ const ManualKontrol = () => {
                           value={inputSpeed}
                           onChange={handleInputChange}
                           disabled={isUpdatingSetting}
-                          className="p-2 border rounded w-20 text-center border-gray-400 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-20 p-2 text-center text-gray-700 border border-gray-400 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                       />
                       <button
                           onClick={handleInputConfirm}
                           disabled={isUpdatingSetting}
-                          className="px-4 py-2 bg-gray-500 text-white font-bold rounded-lg hover:bg-gray-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="px-4 py-2 font-bold text-white transition-all bg-gray-500 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Set Speed
                       </button>
@@ -465,12 +465,12 @@ const ManualKontrol = () => {
 
             {/* Kontrol Target - Auto Mode */}
             {mode === "auto" && status === "on" && (
-                <div className="w-full bg-gray-100 p-6 rounded-lg shadow-lg border border-gray-300 text-center">
-                  <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+                <div className="w-full p-6 text-center bg-gray-100 border border-gray-300 rounded-lg shadow-lg">
+                  <h2 className="mb-4 text-2xl font-semibold text-gray-700">
                     Target DO: {target} mg/L
                   </h2>
 
-                  <div className="mt-4 flex flex-col items-center gap-4">
+                  <div className="flex flex-col items-center gap-4 mt-4">
                     <h2 className="text-xl font-semibold text-gray-700">
                       Input Setpoint Dissolved Oxygen
                     </h2>
@@ -483,12 +483,12 @@ const ManualKontrol = () => {
                           value={inputTarget}
                           onChange={handleTargetChange}
                           disabled={isUpdatingSetting}
-                          className="p-2 border rounded w-20 text-center border-gray-400 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-20 p-2 text-center text-gray-700 border border-gray-400 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                       />
                       <button
                           onClick={handleTargetConfirm}
                           disabled={isUpdatingSetting}
-                          className="px-4 py-2 bg-gray-500 text-white font-bold rounded-lg hover:bg-gray-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="px-4 py-2 font-bold text-white transition-all bg-gray-500 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Set
                       </button>
@@ -500,58 +500,58 @@ const ManualKontrol = () => {
           </div>
 
           {/* Tabel Riwayat with Pagination */}
-          <div className="mt-8 w-full max-w-6xl">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+          <div className="w-full max-w-6xl mt-8">
+            <h2 className="mb-4 text-2xl font-bold text-gray-800">
               Riwayat Perubahan
             </h2>
-            <div className="overflow-x-auto border border-gray-300 rounded-lg shadow bg-white">
-              <table className="w-full table-auto border-collapse">
+            <div className="overflow-x-auto bg-white border border-gray-300 rounded-lg shadow">
+              <table className="w-full border-collapse table-auto">
                 <thead className="bg-gray-200">
                 <tr>
-                  <th className="border px-4 py-2">Waktu</th>
-                  <th className="border px-4 py-2">Status</th>
-                  <th className="border px-4 py-2">Mode</th>
-                  <th className="border px-4 py-2">Power Set Point (%)</th>
-                  <th className="border px-4 py-2">DO Set Point (mg/L)</th>
-                  <th className="border px-4 py-2">Diubah Oleh</th>
+                  <th className="px-4 py-2 border">Waktu</th>
+                  <th className="px-4 py-2 border">Status</th>
+                  <th className="px-4 py-2 border">Mode</th>
+                  <th className="px-4 py-2 border">Power Set Point (%)</th>
+                  <th className="px-4 py-2 border">DO Set Point (mg/L)</th>
+                  <th className="px-4 py-2 border">Diubah Oleh</th>
                 </tr>
                 </thead>
                 <tbody>
                 {isHistoryLoading ? (
                     <tr>
                       <td colSpan="6" className="py-4">
-                        <div className="flex items-center text-center justify-center">
+                        <div className="flex items-center justify-center text-center">
                           <Loader className="size-8 animate-spin"/>
                         </div>
                       </td>
                     </tr>
                 ) : !history.length ? (
                     <tr>
-                      <td colSpan="6" className="text-center py-4 text-gray-500">
+                      <td colSpan="6" className="py-4 text-center text-gray-500">
                         Belum ada riwayat perubahan
                       </td>
                     </tr>
                 ) : (
                     history.map((item) => (
                         <tr key={item._id} className="hover:bg-gray-100">
-                          <td className="border px-4 py-2">{formatDate(item.createdAt)}</td>
-                          <td className="border px-4 py-2">
+                          <td className="px-4 py-2 border">{formatDate(item.createdAt)}</td>
+                          <td className="px-4 py-2 border">
                         <span className={`px-2 py-1 rounded ${
                             item.state === 'on' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'
                         }`}>
                           {item.state.toUpperCase()}
                         </span>
                           </td>
-                          <td className="border px-4 py-2">
+                          <td className="px-4 py-2 border">
                         <span className={`px-2 py-1 rounded ${
                             item.mode === 'auto' ? 'bg-blue-200 text-blue-800' : 'bg-yellow-200 text-yellow-800'
                         }`}>
                           {item.mode.toUpperCase()}
                         </span>
                           </td>
-                          <td className="border px-4 py-2 text-center">{item.power_set_point}</td>
-                          <td className="border px-4 py-2 text-center">{item.do_set_point}</td>
-                          <td className="border px-4 py-2">{item.createdBy?.name || 'Unknown'}</td>
+                          <td className="px-4 py-2 text-center border">{item.power_set_point}</td>
+                          <td className="px-4 py-2 text-center border">{item.do_set_point}</td>
+                          <td className="px-4 py-2 border">{item.createdBy?.name || 'Unknown'}</td>
                         </tr>
                     ))
                 )}
@@ -560,7 +560,7 @@ const ManualKontrol = () => {
 
               {/* Pagination Controls */}
               {!isHistoryLoading && history.length > 0 && (
-                  <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-t">
+                  <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50">
                     <div className="text-sm text-gray-700">
                       Menampilkan {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} - {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} dari {pagination.totalItems} data
                     </div>
@@ -569,7 +569,7 @@ const ManualKontrol = () => {
                       <button
                           onClick={() => handlePageChange(pagination.currentPage - 1)}
                           disabled={pagination.currentPage === 1}
-                          className="px-3 py-1 rounded border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                          className="flex items-center gap-1 px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <ChevronLeft className="w-4 h-4" />
                         Previous
@@ -609,7 +609,7 @@ const ManualKontrol = () => {
                       <button
                           onClick={() => handlePageChange(pagination.currentPage + 1)}
                           disabled={pagination.currentPage === pagination.totalPages}
-                          className="px-3 py-1 rounded border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                          className="flex items-center gap-1 px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Next
                         <ChevronRight className="w-4 h-4" />
@@ -623,9 +623,9 @@ const ManualKontrol = () => {
 
         {/* Modal Konfirmasi */}
         {pendingChange && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-              <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full text-center">
-                <h2 className="text-xl font-bold mb-4 text-gray-800">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+              <div className="w-full max-w-sm p-6 text-center bg-white rounded-lg shadow-lg">
+                <h2 className="mb-4 text-xl font-bold text-gray-800">
                   Konfirmasi Perubahan
                 </h2>
                 <p className="mb-6 text-gray-700">
@@ -643,7 +643,7 @@ const ManualKontrol = () => {
                   <button
                       onClick={handleConfirmChange}
                       disabled={isUpdatingSetting}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition disabled:opacity-50 flex items-center gap-2"
+                      className="flex items-center gap-2 px-4 py-2 font-bold text-white transition bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50"
                   >
                     {isUpdatingSetting && <Loader className="size-4 animate-spin" />}
                     {isUpdatingSetting ? 'Menyimpan...' : 'Konfirmasi'}
@@ -651,7 +651,7 @@ const ManualKontrol = () => {
                   <button
                       onClick={handleCancelChange}
                       disabled={isUpdatingSetting}
-                      className="px-4 py-2 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition disabled:opacity-50"
+                      className="px-4 py-2 font-bold text-white transition bg-red-500 rounded-lg hover:bg-red-600 disabled:opacity-50"
                   >
                     Batal
                   </button>

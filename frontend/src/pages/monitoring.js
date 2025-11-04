@@ -1,5 +1,5 @@
 // File: Monitoring.js
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import CardSensor from "../component/cardsensor";
 import Header from "../component/header";
 import { useDataStore } from "../store/useDataStore";
@@ -20,7 +20,7 @@ const Monitoring = () => {
   useEffect(() => {
     getLatestData();
     subscribe();
-  }, []);
+  }, [getLatestData, subscribe]);
 
   useEffect(() => {
     getGraph?.(intervalMinutes);
@@ -38,7 +38,7 @@ const Monitoring = () => {
 
   return (
     <div className="flex min-h-screen bg-[#F9F4F4]">
-      <div className="flex-1 flex flex-col">
+      <div className="flex flex-col flex-1">
         {/* Header */}
         <Header
           pageName="Monitoring"
@@ -46,9 +46,9 @@ const Monitoring = () => {
           notifications={0}
         />
 
-        <div className="p-4 sm:p-6 md:p-8 flex flex-col gap-6">
+        <div className="flex flex-col gap-6 p-4 sm:p-6 md:p-8">
           {/* Map Section */}
-          <div className="bg-white p-3 sm:p-4 rounded-xl shadow-md">
+          <div className="p-3 bg-white shadow-md sm:p-4 rounded-xl">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3165.4995481261174!2d109.46853107460685!3d-6.830255646756649!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e705c9ae10d9799%3A0xf0f4bc354d0d2b40!2sTambak%20Udang%20Prima%20Sukses%20Bersama!5e0!3m2!1sen!2sid!4v1234567890123"
               width="100%"
@@ -64,17 +64,10 @@ const Monitoring = () => {
           {/* Sensor Data Section */}
           <div>
             {isValueLoading || isGraphLoading ? (
-              <div className="text-center text-gray-500 py-6">Memuat data sensor...</div>
+              <div className="py-6 text-center text-gray-500">Memuat data sensor...</div>
             ) : (
               <div
-                className="
-                  grid 
-                  grid-cols-1 
-                  sm:grid-cols-2 
-                  lg:grid-cols-3 
-                  xl:grid-cols-4 
-                  gap-4
-                "
+                className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
               >
                 {latestData && latestData.length > 0 ? (
                   latestData.map((data, index) => (
@@ -93,7 +86,7 @@ const Monitoring = () => {
                     />
                   ))
                 ) : (
-                  <div className="col-span-full text-center text-gray-600 py-4">
+                  <div className="py-4 text-center text-gray-600 col-span-full">
                     Data sensor tidak ditemukan.
                   </div>
                 )}

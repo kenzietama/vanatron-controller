@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../component/header";
 import { Eye, EyeOff } from "lucide-react";
@@ -65,7 +65,7 @@ const CreateUserAdmin = () => {
 
   return (
     <div className="flex min-h-screen bg-[#F9F4F4]">
-      <div className="flex-1 flex flex-col">
+      <div className="flex flex-col flex-1">
         {/* Header */}
         <Header
           pageName="Create Users Admin"
@@ -73,23 +73,23 @@ const CreateUserAdmin = () => {
           notifications={0}
         />
 
-        <div className="flex-1 p-6 flex justify-center">
-          <div className="bg-white w-full max-w-5xl shadow-lg rounded-lg border border-gray-300 p-6">
+        <div className="flex justify-center flex-1 p-6">
+          <div className="w-full max-w-5xl p-6 bg-white border border-gray-300 rounded-lg shadow-lg">
             {/* Top Buttons */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <div className="flex flex-col items-start justify-between gap-4 mb-6 md:flex-row md:items-center">
               <h2 className="text-2xl font-semibold text-gray-800">
                 Create Users Admin
               </h2>
-              <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+              <div className="flex flex-col w-full gap-3 sm:flex-row md:w-auto">
                 <button
                   onClick={handleSubmit}
-                  className="w-full sm:w-36 px-6 py-2 text-sm bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600 transition"
+                  className="w-full px-6 py-2 text-sm font-semibold text-white transition bg-blue-500 rounded-full sm:w-36 hover:bg-blue-600"
                 >
                   Save
                 </button>
                 <button
                   onClick={handleBack}
-                  className="w-full sm:w-36 px-6 py-2 text-sm bg-white border border-blue-500 text-blue-500 font-semibold rounded-full hover:bg-blue-600 hover:text-white transition"
+                  className="w-full px-6 py-2 text-sm font-semibold text-blue-500 transition bg-white border border-blue-500 rounded-full sm:w-36 hover:bg-blue-600 hover:text-white"
                 >
                   Back
                 </button>
@@ -97,7 +97,7 @@ const CreateUserAdmin = () => {
             </div>
 
             {errorMessage && (
-              <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-4">
+              <div className="p-4 mb-4 text-red-700 bg-red-100 rounded-lg">
                 {errorMessage}
               </div>
             )}
@@ -105,22 +105,22 @@ const CreateUserAdmin = () => {
             {/* Mobile*/}
             <form
               onSubmit={handleSubmit}
-              className="block md:hidden space-y-6 divide-y divide-gray-200"
+              className="block space-y-6 divide-y divide-gray-200 md:hidden"
             >
-              <div className="pt-2 flex flex-col sm:flex-row items-start gap-4">
+              <div className="flex flex-col items-start gap-4 pt-2 sm:flex-row">
                 <label className="text-sm font-medium text-gray-700">
                   Photo
                 </label>
                 <div className="relative">
-                  <div className="w-24 h-24 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-gray-100">
+                  <div className="flex items-center justify-center w-24 h-24 overflow-hidden bg-gray-100 border border-gray-300 rounded-full">
                     {photo ? (
                       <img
                         src={photo}
                         alt="Preview"
-                        className="w-full h-full object-cover"
+                        className="object-cover w-full h-full"
                       />
                     ) : (
-                      <span className="text-gray-500 text-xs">No Image</span>
+                      <span className="text-xs text-gray-500">No Image</span>
                     )}
                   </div>
                   <input
@@ -132,7 +132,7 @@ const CreateUserAdmin = () => {
                 </div>
               </div>
 
-              <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6 pt-6 sm:grid-cols-2">
                 <div className="flex flex-col">
                   <label className="text-sm font-medium text-gray-700">
                     Name
@@ -141,7 +141,7 @@ const CreateUserAdmin = () => {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="mt-1 h-10 px-4 border border-gray-300 rounded-lg"
+                    className="h-10 px-4 mt-1 border border-gray-300 rounded-lg"
                     placeholder="Enter Name"
                     required
                   />
@@ -155,7 +155,7 @@ const CreateUserAdmin = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="mt-1 h-10 px-4 border border-gray-300 rounded-lg"
+                    className="h-10 px-4 mt-1 border border-gray-300 rounded-lg"
                     placeholder="Enter Email"
                     required
                   />
@@ -168,7 +168,7 @@ const CreateUserAdmin = () => {
                   <select
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
-                    className="mt-1 h-10 px-4 border border-gray-300 rounded-lg"
+                    className="h-10 px-4 mt-1 border border-gray-300 rounded-lg"
                     required
                   >
                     <option value="">Select Role</option>
@@ -182,14 +182,14 @@ const CreateUserAdmin = () => {
                   <label className="text-sm font-medium text-gray-700">
                     Status
                   </label>
-                  <div className="mt-1 flex gap-4">
+                  <div className="flex gap-4 mt-1">
                     <label className="flex items-center gap-2">
                       <input
                         type="radio"
                         value="Active"
                         checked={status === "Active"}
                         onChange={(e) => setStatus(e.target.value)}
-                        className="h-4 w-4"
+                        className="w-4 h-4"
                       />
                       <span>Active</span>
                     </label>
@@ -199,7 +199,7 @@ const CreateUserAdmin = () => {
                         value="Non Active"
                         checked={status === "Non Active"}
                         onChange={(e) => setStatus(e.target.value)}
-                        className="h-4 w-4"
+                        className="w-4 h-4"
                       />
                       <span>Non Active</span>
                     </label>
@@ -220,7 +220,7 @@ const CreateUserAdmin = () => {
                     />
                     <span
                       onClick={toggleShowPassword}
-                      className="absolute top-2 right-3 cursor-pointer text-gray-600 hover:text-gray-800"
+                      className="absolute text-gray-600 cursor-pointer top-2 right-3 hover:text-gray-800"
                     >
                       {showPassword ? (
                         <EyeOff className="w-5 h-5" />
@@ -236,19 +236,19 @@ const CreateUserAdmin = () => {
             {/* Desktop / Tablet*/}
             <form
               onSubmit={handleSubmit}
-              className="hidden md:block space-y-4 mt-4"
+              className="hidden mt-4 space-y-4 md:block"
             >
-              <div className="flex justify-start items-center space-x-4 ml-4">
+              <div className="flex items-center justify-start ml-4 space-x-4">
                 <label className="w-1/4 text-sm font-medium text-gray-700">
                   Photo
                 </label>
                 <div className="relative">
-                  <div className="w-24 h-24 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-black">
+                  <div className="flex items-center justify-center w-24 h-24 overflow-hidden bg-black border border-gray-300 rounded-full">
                     {photo ? (
                       <img
                         src={photo}
                         alt="Preview"
-                        className="w-full h-full object-cover"
+                        className="object-cover w-full h-full"
                       />
                     ) : (
                       <span className="text-gray-500">No Image</span>
@@ -263,7 +263,7 @@ const CreateUserAdmin = () => {
                 </div>
               </div>
 
-              <div className="flex justify-start items-center space-x-4 ml-4">
+              <div className="flex items-center justify-start ml-4 space-x-4">
                 <label className="w-1/4 text-sm font-medium text-gray-700">
                   Name
                 </label>
@@ -277,7 +277,7 @@ const CreateUserAdmin = () => {
                 />
               </div>
 
-              <div className="flex justify-start items-center space-x-4 ml-4">
+              <div className="flex items-center justify-start ml-4 space-x-4">
                 <label className="w-1/4 text-sm font-medium text-gray-700">
                   Email
                 </label>
@@ -291,7 +291,7 @@ const CreateUserAdmin = () => {
                 />
               </div>
 
-              <div className="flex justify-start items-center space-x-4 ml-4">
+              <div className="flex items-center justify-start ml-4 space-x-4">
                 <label className="w-1/4 text-sm font-medium text-gray-700">
                   Role
                 </label>
@@ -308,7 +308,7 @@ const CreateUserAdmin = () => {
                 </select>
               </div>
 
-              <div className="flex justify-start items-center space-x-4 ml-4">
+              <div className="flex items-center justify-start ml-4 space-x-4">
                 <label className="w-1/4 text-sm font-medium text-gray-700">
                   Status
                 </label>
@@ -319,7 +319,7 @@ const CreateUserAdmin = () => {
                       value="Active"
                       checked={status === "Active"}
                       onChange={(e) => setStatus(e.target.value)}
-                      className="h-4 w-4"
+                      className="w-4 h-4"
                     />
                     <span>Active</span>
                   </label>
@@ -329,18 +329,18 @@ const CreateUserAdmin = () => {
                       value="Non Active"
                       checked={status === "Non Active"}
                       onChange={(e) => setStatus(e.target.value)}
-                      className="h-4 w-4"
+                      className="w-4 h-4"
                     />
                     <span>Non Active</span>
                   </label>
                 </div>
               </div>
 
-              <div className="flex justify-start items-center space-x-4 ml-4">
+              <div className="flex items-center justify-start ml-4 space-x-4">
                 <label className="w-1/4 text-sm font-medium text-gray-700">
                   Password
                 </label>
-                <div className="w-3/4 relative">
+                <div className="relative w-3/4">
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
@@ -350,7 +350,7 @@ const CreateUserAdmin = () => {
                   />
                   <span
                     onClick={toggleShowPassword}
-                    className="absolute top-2 right-2 cursor-pointer text-gray-600 hover:text-gray-800"
+                    className="absolute text-gray-600 cursor-pointer top-2 right-2 hover:text-gray-800"
                   >
                     {showPassword ? (
                       <EyeOff className="w-6 h-6" />
