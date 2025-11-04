@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const dissolvedOxygen = require('../models/dissolvedOxygen');
 const displayItem = require('../models/displayItem');
 const {io} = require('../lib/socket');
+const { emitThresholdAlerts } = require('../lib/thresholdNotifier.js');
 
 const getDO = async (req, res) => {
     try {
@@ -43,6 +44,7 @@ const addDO = async (req, res) => {
 
         if(response) {
             io.emit(`dissolvedoxygens${deviceId}`, DO)
+            emitThresholdAlerts('dissolvedoxygens', deviceId, requestBody)
         }
         res.status(200).json(DO)
     } catch (error) {

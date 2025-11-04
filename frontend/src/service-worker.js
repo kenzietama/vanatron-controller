@@ -70,3 +70,25 @@ self.addEventListener('message', (event) => {
 });
 
 // Any other custom service worker logic can go here.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = event.notification.data?.url ?? '/';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientsArr) => {
+      const matched = clientsArr.find((client) => client.url.includes(self.location.origin));
+      if (matched) {
+        matched.focus();
+        matched.navigate(targetUrl);
+        return;
+      }
+      self.clients.openWindow(targetUrl);
+    })
+  );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SHOW_NOTIFICATION') {
+    const { title, options } = event.data.payload;
+    event.waitUntil(self.registration.showNotification(title, options));
+  }
+});
