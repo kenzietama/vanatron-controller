@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const ph = require ('../models/PH');   // ubah ws -> ph
 const {io} = require('../lib/socket');
 const displayItem = require('../models/displayItem')
+const { emitThresholdAlerts } = require('../lib/thresholdNotifier.js');
 
 const getPH = async (req, res) => {
     try {
@@ -44,6 +45,7 @@ const addPH = async (req, res) => {
 
         if(response) {
             io.emit(`pH${deviceId}`, PH)
+            emitThresholdAlerts('pH', deviceId, requestBody)
         }
 
         res.status(200).json(PH)   // ubah WS -> PH

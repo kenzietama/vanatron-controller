@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const inverterSRNE = require('../models/inverterSRNE');
 const {io} = require('../lib/socket');
 const displayItem = require("../models/displayItem");
+const { emitThresholdAlerts } = require('../lib/thresholdNotifier.js');
 
 const getInverterSRNE = async (req, res) => {
     try {
@@ -44,6 +45,7 @@ const addInverterSRNE = async (req, res) => {
 
         if(response) {
             io.emit(`invertersrnes${deviceId}`, InverterSRNE)
+            emitThresholdAlerts('invertersrnes', deviceId, requestBody)
         }
 
         res.status(200).json(InverterSRNE)

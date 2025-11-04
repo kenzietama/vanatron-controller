@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const vfd = require ('../models/VFD');
 const {io} = require('../lib/socket');
 const displayItem = require('../models/displayItem')
+const { emitThresholdAlerts } = require('../lib/thresholdNotifier.js');
 
 //get
 const getVFD = async (req, res) => {
@@ -45,6 +46,7 @@ const addVFD = async (req, res) => {
 
         if(response) {
             io.emit(`vfds${deviceId}`, VFD)
+            emitThresholdAlerts('vfds', deviceId, requestBody)
         }
 
         res.status(200).json(VFD)
