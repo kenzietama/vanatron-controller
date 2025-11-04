@@ -12,6 +12,7 @@ const sensorRoutes = require("./routes/sensorRoutes");
 const parameterRoutes = require("./routes/parameterRoutes");
 const controlSystemRoutes = require("./routes/controlSystemRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
+const pushSubscriptionRoutes = require("./routes/pushSubscriptionRoutes");
 
 const dissolvedOxygenRoutes = require("./routes/dissolvedOxygenRoutes");
 const inverterSRNERoutes = require("./routes/inverterSRNERoutes");
@@ -32,7 +33,7 @@ const port = 5000;
 
 // Middleware
 app.use(cors({
-    origin: ["http://localhost:3000", "https://vanatron.kenzietama.site:3000"],
+    origin: ["http://localhost:3000", "https://vanatron.kenzietama.site:3000", "https://dev.kenzietama.site"],
     credentials: true
 })); // Menangani masalah CORS
 app.use(express.json()); // Menangani parsing JSON
@@ -60,6 +61,7 @@ app.use('/api/ph', phRoutes)
 app.use('/api/salinity', salinityRoutes)
 app.use('/api/watertemperature', watertemperatureRoutes)
 app.use("/api/notifications", notificationRoutes)
+app.use("/api/push-subscriptions", pushSubscriptionRoutes)
 
 app.use("/api/custom", customRoutes)
 

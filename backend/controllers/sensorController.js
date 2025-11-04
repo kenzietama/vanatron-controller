@@ -41,7 +41,10 @@ const updateSensors = async (req, res) => {
   let response
   try {
     const collection = await mongoose.connection.db.listCollections().toArray()
-    const filteredCollection = collection.filter(item => item.name !== 'accounts' && item.name !== 'parameters' && item.name !== 'sensors' && item.name !== 'displayitems');
+    const filteredCollection = collection.filter(item => item.name !== 'accounts' &&
+      item.name !== 'parameters' && item.name !== 'sensors' && item.name !== 'displayitems' &&
+      item.name !== 'pushsubscriptions' && item.name !== 'controlsystems' && item.name !== 'notifications'
+      && item.name !== 'invertersolis');
     const collectionNames = filteredCollection.map(item => ({name: item.name}));
 
     const existingSensors = await Sensor.find({}).exec()

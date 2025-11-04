@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Bell, X } from "lucide-react";
 import { io } from "socket.io-client";
 import axios from "axios";
+import { subscribeToPush } from "../lib/push";
 
 // const socket = io("process.env.REACT_APP_BACKEND_URL", { withCredentials: true });
 const socket = io(process.env.REACT_APP_BACKEND_URL);
@@ -11,6 +12,17 @@ const NotificationDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const notifRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof Notification === "undefined") {
+      return;
+    }
+    if (Notification.permission === "granted") {
+      subscribeToPush().catch((error) => {
+        console.error("Failed to ensure push subscription", error);
+      });
+    }
+  }, []);
 
   // Load awal notifikasi dari backend
   useEffect(() => {
@@ -22,11 +34,17 @@ const NotificationDropdown = () => {
     socket.on("new-notification", async (notif) => {
       setNotifications((prev) => [notif, ...prev]);
 
+      if (typeof Notification === "undefined") {
+        return;
+      }
+
       if (Notification.permission === "default") {
         await Notification.requestPermission();
       }
       if (Notification.permission === "granted") {
-        const registration = await navigator.serviceWorker.getRegistration();
+        await subscribeToPush().catch((error) => {
+          console.error("Failed to subscribe to push notifications", error);
+        });
         const payload = {
           body: notif.message,
           tag: `${notif.sensor}-${notif.device}-${notif.parameter}`,
@@ -35,14 +53,22 @@ const NotificationDropdown = () => {
           vibrate: [150, 75, 150],
         };
 
-        if (registration?.active) {
-          registration.active.postMessage({
-            type: "SHOW_NOTIFICATION",
-            payload: { title: notif.title, options: payload },
-          });
-        } else {
-          new Notification(notif.title, payload);
+        if (
+          "serviceWorker" in navigator &&
+          typeof navigator.serviceWorker.ready?.then === "function"
+        ) {
+          try {
+            const registration = await navigator.serviceWorker.ready;
+            if (typeof registration.showNotification === "function") {
+              await registration.showNotification(notif.title, payload);
+              return;
+            }
+          } catch (error) {
+            console.error("Failed to show notification via service worker", error);
+          }
         }
+
+        console.warn("Service worker registration missing; skipping system notification display.");
       }
     });
 
