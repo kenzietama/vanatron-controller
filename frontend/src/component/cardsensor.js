@@ -1,5 +1,5 @@
 // File: CardSensor.jsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -35,7 +35,8 @@ const CardSensor = ({
   unit,
   currentInterval = 60,
   onIntervalChange,
-  onRefresh
+  onRefresh,
+  graphReady = false
 }) => {
   const { isGraphRefreshing } = useDataStore();
   const [showDetail, setShowDetail] = useState(false);
@@ -122,7 +123,7 @@ const CardSensor = ({
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-lg text-center border border-gray-300">
+    <div className="p-4 text-center bg-white border border-gray-300 rounded-lg shadow-lg">
       <h2 className="text-xl font-bold" style={{ fontFamily: "Inter, sans-serif" }}>
         {name}
       </h2>
@@ -132,17 +133,26 @@ const CardSensor = ({
       >
         {value}
       </p>
-      <button
-        className="text-black-500 underline mt-2 font-bold"
-        onClick={() => setShowDetail(true)}
-      >
-        Detail
-      </button>
 
-      {showDetail && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50">
+      {graphReady ? (
+        <div className="justify-center mt-2">
+          <button
+            className="mt-2 font-bold underline text-black-500"
+            onClick={() => setShowDetail(true)}
+          >
+            Detail
+          </button>
+        </div>
+      ) : (
+        <div className="flex justify-center mt-2">
+          <div className="w-20 h-5 bg-gray-300 rounded animate-pulse" />
+        </div>
+      )}
+
+      {showDetail && graphReady && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500 bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-[70%] md:w-[65%] lg:w-[45%] max-w-5xl">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-left">{name} Details</h3>
               <div className="flex gap-2">
                 <select
@@ -161,49 +171,49 @@ const CardSensor = ({
 
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-gray-200 transition disabled:opacity-60"
+                  className="inline-flex items-center justify-center transition rounded-lg w-9 h-9 hover:bg-gray-200 disabled:opacity-60"
                   onClick={handleRefresh}
                   title={isGraphRefreshing ? "Refreshing..." : "Refresh"}
                   disabled={isGraphRefreshing}
                 >
                   {isGraphRefreshing ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                    <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
                   ) : (
-                    <RotateCw className="h-5 w-5 text-blue-600" />
+                    <RotateCw className="w-5 h-5 text-blue-600" />
                   )}
                 </button>
 
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-gray-200 transition"
+                  className="inline-flex items-center justify-center transition rounded-lg w-9 h-9 hover:bg-gray-200"
                   onClick={downloadChart}
                   title="Download Chart"
                 >
-                  <Download className="h-5 w-5 text-blue-600" />
+                  <Download className="w-5 h-5 text-blue-600" />
                 </button>
 
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-gray-200 transition"
+                  className="inline-flex items-center justify-center transition rounded-lg w-9 h-9 hover:bg-gray-200"
                   onClick={() => setShowDetail(false)}
                   title="Close"
                 >
-                  <X className="h-5 w-5 text-blue-600" />
+                  <X className="w-5 h-5 text-blue-600" />
                 </button>
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-6 text-left">
-              <div className="flex flex-col gap-4 w-full md:w-1/4">
-                <div className="p-4 rounded border border-gray-300 shadow-md text-left">
+            <div className="flex flex-col gap-6 text-left md:flex-row">
+              <div className="flex flex-col w-full gap-4 md:w-1/4">
+                <div className="p-4 text-left border border-gray-300 rounded shadow-md">
                   <p className="font-bold text-green-700">Highest</p>
                   <p className="text-3xl font-bold text-blue-500">{getHighestValue()}</p>
                 </div>
-                <div className="p-4 rounded border border-gray-300 shadow-md text-left">
+                <div className="p-4 text-left border border-gray-300 rounded shadow-md">
                   <p className="font-bold text-yellow-700">Average</p>
                   <p className="text-3xl font-bold text-blue-500">{getAverageValue()}</p>
                 </div>
-                <div className="p-4 rounded border border-gray-300 shadow-md text-left">
+                <div className="p-4 text-left border border-gray-300 rounded shadow-md">
                   <p className="font-bold text-red-700">Lowest</p>
                   <p className="text-3xl font-bold text-blue-500">{getLowestValue()}</p>
                 </div>

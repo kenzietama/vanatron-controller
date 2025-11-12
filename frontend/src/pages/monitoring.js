@@ -63,28 +63,33 @@ const Monitoring = () => {
 
           {/* Sensor Data Section */}
           <div>
-            {isValueLoading || isGraphLoading ? (
+            {isValueLoading ? (
               <div className="py-6 text-center text-gray-500">Memuat data sensor...</div>
             ) : (
               <div
                 className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
               >
                 {latestData && latestData.length > 0 ? (
-                  latestData.map((data, index) => (
-                    <CardSensor
-                      key={data._id}
-                      name={`${data.displayName} (${data.unit})`}
-                      displayName={data.displayName}
-                      value={data.value}
-                      data={graph[index]}
-                      unit={data.unit}
-                      minValue={data.minValue}
-                      maxValue={data.maxValue}
-                      currentInterval={intervalMinutes}
-                      onRefresh={handleRefresh}
-                      onIntervalChange={handleIntervalChange}
-                    />
-                  ))
+                  latestData.map((data, index) => {
+                    const series = graph?.[index] || [];
+                    const graphReady = Array.isArray(series) && series.length > 0 && !isGraphLoading;
+                    return (
+                      <CardSensor
+                        key={data._id}
+                        name={`${data.displayName} (${data.unit})`}
+                        displayName={data.displayName}
+                        value={data.value}
+                        data={series}
+                        unit={data.unit}
+                        minValue={data.minValue}
+                        maxValue={data.maxValue}
+                        currentInterval={intervalMinutes}
+                        onRefresh={handleRefresh}
+                        onIntervalChange={handleIntervalChange}
+                        graphReady={graphReady}
+                      />
+                    );
+                  })
                 ) : (
                   <div className="py-4 text-center text-gray-600 col-span-full">
                     Data sensor tidak ditemukan.
