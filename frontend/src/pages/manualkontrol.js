@@ -28,6 +28,7 @@ const ManualKontrol = () => {
   const [status, setStatus] = useState("off");
   const [pendingChange, setPendingChange] = useState(null);
   const [tempSpeed, setTempSpeed] = useState(50);
+  const [tempTarget, setTempTarget] = useState(4);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   // Safety constants
@@ -68,6 +69,7 @@ const ManualKontrol = () => {
       setInputSpeed(settings.power_set_point);
       setInputTarget(settings.do_set_point);
       setTempSpeed(settings.power_set_point);
+      setTempTarget(settings.do_set_point);
     }
   }, [settings]);
 
@@ -104,6 +106,27 @@ const ManualKontrol = () => {
 
   const handleTargetChange = (e) => {
     setInputTarget(e.target.value);
+  };
+
+  const handleTargetSliderChange = (e) => {
+    const newTarget = parseFloat(e.target.value);
+    setTempTarget(newTarget);
+  };
+
+  const handleTargetSliderRelease = () => {
+    if (tempTarget !== target) {
+      if (tempTarget < MIN_DO) {
+        toast.error(`DO set point must be at least ${MIN_DO} mg/L for safety`);
+        setTempTarget(target);
+        return;
+      }
+      if (tempTarget > MAX_DO) {
+        toast.error(`DO set point cannot exceed ${MAX_DO} mg/L`);
+        setTempTarget(target);
+        return;
+      }
+      setPendingChange({ type: "target", value: parseFloat(tempTarget.toFixed(1)) });
+    }
   };
 
   const handleInputConfirm = () => {
@@ -172,6 +195,7 @@ const ManualKontrol = () => {
     if (pendingChange.type === "target") {
       setTarget(pendingChange.value);
       setInputTarget(pendingChange.value);
+      setTempTarget(pendingChange.value);
       newSettings.do_set_point = pendingChange.value;
     }
 
@@ -197,6 +221,7 @@ const ManualKontrol = () => {
       if (pendingChange.type === "target") {
         setTarget(settings.do_set_point);
         setInputTarget(settings.do_set_point);
+        setTempTarget(settings.do_set_point);
       }
       if (pendingChange.type === "mode") {
         setMode(settings.mode);
@@ -209,6 +234,7 @@ const ManualKontrol = () => {
 
   const handleCancelChange = () => {
     setTempSpeed(speed);
+    setTempTarget(target);
     setPendingChange(null);
   };
 
@@ -256,6 +282,19 @@ const ManualKontrol = () => {
     };
   };
 
+  const SafetySkeleton = () => (
+      <div className="w-full max-w-2xl mb-4">
+        <div className="p-4 border-l-4 border-yellow-200 rounded bg-yellow-50 animate-pulse">
+          <div className="w-40 h-4 mb-3 bg-yellow-100 rounded"></div>
+          <div className="space-y-2">
+            {[...Array(4)].map((_, index) => (
+                <div key={index} className="h-3 bg-yellow-100 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+  );
+
   const ControlSkeleton = () => (
       <div className="flex flex-col items-center w-full max-w-2xl p-6 bg-white border-2 border-gray-400 rounded-lg shadow-lg animate-pulse">
         <div className="w-64 h-8 mb-6 bg-gray-300 rounded"></div>
@@ -286,6 +325,7 @@ const ManualKontrol = () => {
               notifications={3}
           />
           <div className="flex flex-col items-center justify-start flex-1 p-6">
+            <SafetySkeleton />
             <ControlSkeleton />
             <div className="w-full max-w-6xl mt-8">
               <div className="w-48 h-8 mb-4 bg-gray-300 rounded animate-pulse"></div>
@@ -307,7 +347,7 @@ const ManualKontrol = () => {
   const frequencyInfo = getFrequencyInfo();
 
   return (
-      <div className="flex flex-col h-screen bg-[#F9F4F4]">
+      <div className="flex flex-col h-auto bg-[#F9F4F4]">
         <Header
             pageName="Manual Kontrol"
             databaseName="Database / Manual Kontrol"
@@ -336,7 +376,7 @@ const ManualKontrol = () => {
           {/* Kontrol */}
           <div className="flex flex-col items-center w-full max-w-2xl p-6 bg-white border-2 border-gray-400 rounded-lg shadow-lg">
             <h1 className="mb-6 text-3xl font-bold text-center text-gray-800">
-              Kontrol Kecepatan Turbin
+              Kontrol Kecepatan Aerator
             </h1>
 
             {/* Tombol ON / OFF */}
@@ -412,6 +452,17 @@ const ManualKontrol = () => {
             </div>
             )}
 
+            {mode === "auto" && status === "on" && (
+            <div className="w-full mb-6">
+              <div className="mb-2 text-center">
+                <p className="text-sm font-semibold text-gray-600">Target DO</p>
+              </div>
+              <div className="flex items-center justify-center w-full h-16 text-3xl font-bold text-gray-700 bg-gray-200 border border-gray-400 rounded-lg">
+                {`${tempTarget.toFixed(1)} mg/L`}
+              </div>
+            </div>
+            )}
+
             {/* Kontrol Speed - Manual Mode */}
             {mode === "manual" && status === "on" && (
                 <div className="w-full p-6 text-center bg-gray-100 border border-gray-300 rounded-lg shadow-lg">
@@ -470,6 +521,24 @@ const ManualKontrol = () => {
                     Target DO: {target} mg/L
                   </h2>
 
+                  <input
+                      type="range"
+                      min={MIN_DO}
+                      max={MAX_DO}
+                      step="0.1"
+                      value={tempTarget}
+                      onChange={handleTargetSliderChange}
+                      onMouseUp={handleTargetSliderRelease}
+                      onTouchEnd={handleTargetSliderRelease}
+                      disabled={isUpdatingSetting}
+                      className="w-full cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+
+                  <div className="flex justify-between mt-2 text-xs text-gray-500">
+                    <span>Min: {MIN_DO} mg/L</span>
+                    <span>Max: {MAX_DO} mg/L</span>
+                  </div>
+
                   <div className="flex flex-col items-center gap-4 mt-4">
                     <h2 className="text-xl font-semibold text-gray-700">
                       Input Setpoint Dissolved Oxygen
@@ -500,7 +569,7 @@ const ManualKontrol = () => {
           </div>
 
           {/* Tabel Riwayat with Pagination */}
-          <div className="w-full max-w-6xl mt-8">
+          <div className="w-full max-w-6xl mt-8" >
             <h2 className="mb-4 text-2xl font-bold text-gray-800">
               Riwayat Perubahan
             </h2>
