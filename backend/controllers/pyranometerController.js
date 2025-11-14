@@ -2,6 +2,7 @@ const pyr = require ('../models/pyranometer');
 const mongoose = require('mongoose');
 const {io} = require('../lib/socket');
 const displayItem = require('../models/displayItem');
+const { emitThresholdAlerts } = require('../lib/thresholdNotifier.js');
 
 //get
 const getPyranometerData = async (req, res) => {
@@ -36,6 +37,7 @@ const addPyranometerData = async (req, res) => {
 
         if(response) {
             io.emit(`pyranometers${deviceId}`, pyranometer)
+            emitThresholdAlerts('pyranometers', deviceId, requestBody)
         }
         res.status(200).json(pyranometer)
     } catch (error) {

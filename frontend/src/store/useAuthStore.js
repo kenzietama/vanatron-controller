@@ -3,14 +3,14 @@ import {axiosInstance} from "../lib/axios"
 import {io} from "socket.io-client"
 import toast from "react-hot-toast";
 
-const BASE_URL = 'http://localhost:5000'
+const BASE_URL = process.env.REACT_APP_BACKEND_URL
 
 export const useAuthStore = create((set, get) => ({
     authAccount: null,
     socket: null,
     errorMessage: null,
     isLoggingIn: null,
-    isCheckingAuth: false,
+    isCheckingAuth: true,
 
     checkAuth: async () => {
         set({isCheckingAuth: true});

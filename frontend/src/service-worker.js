@@ -70,3 +70,55 @@ self.addEventListener('message', (event) => {
 });
 
 // Any other custom service worker logic can go here.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = event.notification.data?.url ?? '/';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientsArr) => {
+      const matched = clientsArr.find((client) => client.url.includes(self.location.origin));
+      if (matched) {
+        matched.focus();
+        matched.navigate(targetUrl);
+        return;
+      }
+      self.clients.openWindow(targetUrl);
+    })
+  );
+});
+
+self.addEventListener('push', (event) => {
+  if (!event.data) {
+    return;
+  }
+
+  let payload;
+  try {
+    payload = event.data.json();
+  } catch (error) {
+    payload = { body: event.data.text() };
+  }
+
+  const title = payload.title || 'New Notification';
+  const body = payload.body || payload.message || 'You have a new alert.';
+  const notificationData = {
+    url: payload.url || payload.data?.url || '/notifications',
+    meta: payload.data,
+  };
+
+  const timestamp = typeof payload.timestamp === 'string' ? Date.parse(payload.timestamp) : payload.timestamp;
+  const resolvedTimestamp = Number.isFinite(timestamp) ? timestamp : Date.now();
+
+  const options = {
+    body,
+    tag: payload.tag,
+    data: notificationData,
+    requireInteraction: true,
+    vibrate: [150, 75, 150],
+    badge: payload.badge,
+    icon: payload.icon,
+    timestamp: resolvedTimestamp,
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+

@@ -28,17 +28,19 @@ function App() {
 
   // console.log(authAccount)
 
-  if(isCheckingAuth && !authAccount) return (
-    <div className="flex items-center justify-center h-screen">
-      <Loader className="size-10 animate-spin" />
-    </div>
-  )
+  if (isCheckingAuth) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader className="size-10 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex">
       {showNavbar && authAccount && <Navbar />}
 
-      <div className="main-content flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto main-content">
         <Routes>
           <Route path="/" element={authAccount ? <Dashboard /> : <Navigate to="/login" />} />
           <Route path="/login" element={!authAccount ? <Login /> : <Navigate to="/" />} />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import gambarudang from '../gambar/gambarudang.png';
 import logo from '../ikon/icon.png';
 import { useAuthStore } from "../store/useAuthStore";
@@ -33,27 +33,27 @@ const Login = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen font-bold">
+    <div className="flex flex-col h-screen font-bold md:flex-row">
       <div className="relative w-full md:w-1/3">
-        <img src={gambarudang} alt="Background" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-white bg-black bg-opacity-40">
-          <div className="absolute top-4 left-4 flex items-center">
-            <img src={logo} alt="Logo" className="h-10 w-10 mr-2" />
+        <img src={gambarudang} alt="Background" className="object-cover w-full h-full" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-black bg-opacity-40">
+          <div className="absolute flex items-center top-4 left-4">
+            <img src={logo} alt="Logo" className="w-10 h-10 mr-2" />
             <span className="text-xl">Admin</span>
           </div>
-          <h1 className="text-4xl md:text-5xl mb-4">Welcome Back!</h1>
-          <p className="text-center text-lg px-6 md:px-12">
+          <h1 className="mb-4 text-4xl md:text-5xl">Welcome Back!</h1>
+          <p className="px-6 text-lg text-center md:px-12">
             Use your access in the application and login to your dashboard account.
           </p>
         </div>
       </div>
 
-      <div className="w-full md:w-2/3 flex flex-col justify-center items-center bg-gray-100 py-8 md:py-0">
+      <div className="flex flex-col items-center justify-center w-full py-8 bg-gray-100 md:w-2/3 md:py-0">
         <div className="w-11/12 md:w-3/4">
-          <h2 className="text-3xl md:text-4xl mb-8 text-left">Login</h2>
+          <h2 className="mb-8 text-3xl text-left md:text-4xl">Login</h2>
           <form onSubmit={handleLogin}>
             <div className="mb-4">
-              <label htmlFor="email" className="block text-gray-600 text-sm mb-2">
+              <label htmlFor="email" className="block mb-2 text-sm text-gray-600">
                 Email
               </label>
               <input
@@ -61,13 +61,13 @@ const Login = () => {
                 id="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                className="w-full px-4 py-2 transition border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter your email"
               />
             </div>
 
             <div className="mb-4">
-              <label htmlFor="password" className="block text-gray-600 text-sm mb-2">
+              <label htmlFor="password" className="block mb-2 text-sm text-gray-600">
                 Password
               </label>
               <div className="relative">
@@ -76,17 +76,17 @@ const Login = () => {
                   id="password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                  className="w-full px-4 py-2 transition border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter your password"
                 />
                 <span
                   onClick={togglePasswordVisibility}
-                  className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-gray-600 hover:text-gray-800"
+                  className="absolute text-gray-600 transform -translate-y-1/2 cursor-pointer top-1/2 right-3 hover:text-gray-800"
                 >
                   {passwordType === 'password' ? (
-                    <Eye className="h-5 w-5" />
+                    <Eye className="w-5 h-5" />
                   ) : (
-                    <EyeOff className="h-5 w-5" />
+                    <EyeOff className="w-5 h-5" />
                   )}
                 </span>
               </div>
@@ -94,12 +94,12 @@ const Login = () => {
 
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition flex items-center justify-center gap-2"
+              className="flex items-center justify-center w-full gap-2 px-4 py-2 text-white transition bg-blue-500 rounded-md hover:bg-blue-600"
               disabled={isLoggingIn}
             >
               {isLoggingIn ? (
                 <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin" />
                   Loading...
                 </>
               ) : (

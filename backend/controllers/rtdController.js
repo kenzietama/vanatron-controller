@@ -2,6 +2,7 @@ const rtd = require ('../models/RTD');
 const mongoose = require('mongoose');
 const {io} = require('../lib/socket');
 const displayItem = require('../models/displayItem');
+const { emitThresholdAlerts } = require('../lib/thresholdNotifier.js');
 
 //get
 const getRTDData = async (req, res) => {
@@ -36,6 +37,7 @@ const addRTDData = async (req, res) => {
 
         if(response) {
             io.emit(`rtds${deviceId}`, rtddata)
+            emitThresholdAlerts('rtds', deviceId, requestBody)
         }
         res.status(200).json(response)
     } catch (error) {

@@ -2,6 +2,7 @@ const wtrtemp = require ('../models/watertemperature');
 const mongoose = require('mongoose');
 const {io} = require('../lib/socket');
 const displayItem = require('../models/displayItem');
+const { emitThresholdAlerts } = require('../lib/thresholdNotifier.js');
 
 //get
 const getWatertemperatureData = async (req, res) => {
@@ -36,6 +37,7 @@ const addWatertemperatureData = async (req, res) => {
 
         if(response) {
             io.emit(`watertemperature${deviceId}`, watertemperature)
+            emitThresholdAlerts('watertemperature', deviceId, requestBody)
         }
         res.status(200).json(watertemperature)
     } catch (error) {

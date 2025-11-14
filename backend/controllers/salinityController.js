@@ -2,6 +2,7 @@ const sal = require ('../models/salinity');
 const mongoose = require('mongoose');
 const {io} = require('../lib/socket');
 const displayItem = require('../models/displayItem');
+const { emitThresholdAlerts } = require('../lib/thresholdNotifier.js');
 
 //get
 const getSalinityData = async (req, res) => {
@@ -36,6 +37,7 @@ const addSalinityData = async (req, res) => {
 
         if(response) {
             io.emit(`salinity${deviceId}`, salinity)
+            emitThresholdAlerts('salinity', deviceId, requestBody)
         }
         res.status(200).json(salinity)
     } catch (error) {

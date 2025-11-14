@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../component/header";
 import { Search } from "lucide-react";
@@ -15,7 +15,7 @@ const UserAdmin = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/accounts");
+        const response = await fetch(process.env.REACT_APP_BACKEND_URL + "/api/accounts");
         const data = await response.json();
         setUsersData(data);
       } catch (error) {
@@ -44,7 +44,7 @@ const UserAdmin = () => {
     if (userToDelete) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/accounts/${userToDelete}`,
+          `${process.env.REACT_APP_BACKEND_URL}/api/accounts/${userToDelete}`,
           { method: "DELETE" }
         );
         if (response.ok) {
@@ -69,7 +69,7 @@ const UserAdmin = () => {
 
   return (
     <div className="flex min-h-screen bg-[#F9F4F4]">
-      <div className="flex-1 flex flex-col">
+      <div className="flex flex-col flex-1">
         {/* Header */}
         <Header
           pageName="Users Admin"
@@ -79,20 +79,20 @@ const UserAdmin = () => {
 
         <div className="flex h-full">
           <div className="flex-1 p-4 sm:p-6">
-            <div className="bg-white shadow-lg rounded-lg border border-gray-300 p-4 sm:p-6 mb-6">
+            <div className="p-4 mb-6 bg-white border border-gray-300 rounded-lg shadow-lg sm:p-6">
               {/* Search + Add Data */}
-              <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-                <div className="w-full sm:flex-1 sm:max-w-3xl relative">
+              <div className="flex flex-col items-center justify-between gap-4 mb-6 sm:flex-row">
+                <div className="relative w-full sm:flex-1 sm:max-w-3xl">
                   <input
                     type="text"
                     placeholder="Search"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full h-10 pl-4 pr-12 border border-gray-300 rounded-lg text-sm sm:text-base"
+                    className="w-full h-10 pl-4 pr-12 text-sm border border-gray-300 rounded-lg sm:text-base"
                   />
                   <button
                     onClick={() => console.log("Search:", searchTerm)}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-md text-black"
+                    className="absolute p-2 text-black transform -translate-y-1/2 rounded-md right-2 top-1/2"
                   >
                     <Search className="w-5 h-5" />
                   </button>
@@ -100,7 +100,7 @@ const UserAdmin = () => {
 
                 <button
                   onClick={handleAddData}
-                  className="w-full sm:w-48 px-6 py-2 bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600 text-sm sm:text-base"
+                  className="w-full px-6 py-2 text-sm font-semibold text-white bg-blue-500 rounded-full sm:w-48 hover:bg-blue-600 sm:text-base"
                 >
                   Add Data
                 </button>
@@ -109,15 +109,15 @@ const UserAdmin = () => {
               {/* Responsive Table */}
               <div className="overflow-x-auto">
                 {/* Tabel untuk layar besar */}
-                <table className="hidden sm:table min-w-full table-auto mb-6">
+                <table className="hidden min-w-full mb-6 table-auto sm:table">
                   <thead className="bg-gray-200">
                     <tr>
-                      <th className="px-3 py-2 text-left text-sm font-medium text-gray-700"></th>
-                      <th className="px-3 py-2 text-left text-sm font-medium text-gray-700">Name</th>
-                      <th className="px-3 py-2 text-left text-sm font-medium text-gray-700">Email</th>
-                      <th className="px-3 py-2 text-left text-sm font-medium text-gray-700">Role</th>
-                      <th className="px-3 py-2 text-left text-sm font-medium text-gray-700">Status</th>
-                      <th className="px-3 py-2 text-center text-sm font-medium text-gray-700">Action</th>
+                      <th className="px-3 py-2 text-sm font-medium text-left text-gray-700"></th>
+                      <th className="px-3 py-2 text-sm font-medium text-left text-gray-700">Name</th>
+                      <th className="px-3 py-2 text-sm font-medium text-left text-gray-700">Email</th>
+                      <th className="px-3 py-2 text-sm font-medium text-left text-gray-700">Role</th>
+                      <th className="px-3 py-2 text-sm font-medium text-left text-gray-700">Status</th>
+                      <th className="px-3 py-2 text-sm font-medium text-center text-gray-700">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -132,7 +132,7 @@ const UserAdmin = () => {
                           <img
                             src={`data:image/png;base64,${data.photo}`}
                             alt={data.name}
-                            className="w-10 h-10 rounded-full border border-gray-300 mx-auto"
+                            className="w-10 h-10 mx-auto border border-gray-300 rounded-full"
                           />
                         </td>
                         <td className="px-3 py-2 text-sm text-gray-800">{data.name}</td>
@@ -155,13 +155,13 @@ const UserAdmin = () => {
                           <div className="flex flex-col items-center space-y-2">
                             <button
                               onClick={() => handleEditData(data._id)}
-                              className="px-3 py-1 w-24 bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600"
+                              className="w-24 px-3 py-1 font-semibold text-white bg-blue-500 rounded-full hover:bg-blue-600"
                             >
                               Edit
                             </button>
                             <button
                               onClick={() => handleOpenModal(data._id)}
-                              className="px-3 py-1 w-24 bg-red-500 text-white font-semibold rounded-full hover:bg-red-600"
+                              className="w-24 px-3 py-1 font-semibold text-white bg-red-500 rounded-full hover:bg-red-600"
                             >
                               Delete
                             </button>
@@ -173,28 +173,28 @@ const UserAdmin = () => {
                 </table>
 
                 {/* Tampilan kartu untuk HP */}
-                <div className="grid sm:hidden gap-4">
+                <div className="grid gap-4 sm:hidden">
                   {filteredData.map((data) => (
                     <div
                       key={data._id}
-                      className="border rounded-lg p-4 bg-gray-50 shadow-sm"
+                      className="p-4 border rounded-lg shadow-sm bg-gray-50"
                     >
                       <div className="flex items-center gap-3 mb-3">
                         <img
                           src={`data:image/png;base64,${data.photo}`}
                           alt={data.name}
-                          className="w-12 h-12 rounded-full border border-gray-300"
+                          className="w-12 h-12 border border-gray-300 rounded-full"
                         />
                         <div>
                           <p className="font-semibold text-gray-800">{data.name}</p>
                           <p className="text-xs text-gray-500 break-all">{data.email}</p>
                         </div>
                       </div>
-                      <p className="text-sm mb-1">
+                      <p className="mb-1 text-sm">
                         <span className="font-semibold">Role: </span>
                         {data.role}
                       </p>
-                      <p className="text-sm mb-2">
+                      <p className="mb-2 text-sm">
                         <span className="font-semibold">Status: </span>
                         <span
                           className={`px-2 py-1 rounded-full text-xs ${
@@ -206,7 +206,7 @@ const UserAdmin = () => {
                           {data.status.charAt(0).toUpperCase() + data.status.slice(1)}
                         </span>
                       </p>
-                      <div className="mt-4 flex justify-between">
+                      <div className="flex justify-between mt-4">
                         <button
                           onClick={() => handleEditData(data._id)}
                           className="px-3 py-1 bg-blue-500 text-white rounded-full w-[45%]"
@@ -230,8 +230,8 @@ const UserAdmin = () => {
 
         {/* Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center px-4">
-            <div className="bg-white rounded-lg p-6 w-full max-w-sm sm:max-w-md shadow-lg">
+          <div className="fixed inset-0 flex items-center justify-center px-4 bg-gray-500 bg-opacity-50">
+            <div className="w-full max-w-sm p-6 bg-white rounded-lg shadow-lg sm:max-w-md">
               <h3
                 className={`text-base sm:text-lg font-semibold mb-4 ${
                   modalType === "success"
@@ -248,13 +248,13 @@ const UserAdmin = () => {
                   <>
                     <button
                       onClick={handleCloseModal}
-                      className="px-4 py-2 bg-gray-300 text-gray-800 rounded-full hover:bg-gray-400 text-sm"
+                      className="px-4 py-2 text-sm text-gray-800 bg-gray-300 rounded-full hover:bg-gray-400"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleDeleteData}
-                      className="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 text-sm"
+                      className="px-4 py-2 text-sm text-white bg-red-500 rounded-full hover:bg-red-600"
                     >
                       Delete
                     </button>
@@ -262,7 +262,7 @@ const UserAdmin = () => {
                 ) : (
                   <button
                     onClick={handleCloseModal}
-                    className="px-4 py-2 bg-gray-300 text-gray-800 rounded-full hover:bg-gray-400 text-sm"
+                    className="px-4 py-2 text-sm text-gray-800 bg-gray-300 rounded-full hover:bg-gray-400"
                   >
                     Close
                   </button>

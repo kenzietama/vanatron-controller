@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const ws = require ('../models/weatherStation');
 const {io} = require('../lib/socket');
 const displayItem = require('../models/displayItem')
+const { emitThresholdAlerts } = require('../lib/thresholdNotifier.js');
 
 const getWS = async (req, res) => {
     try {
@@ -44,6 +45,7 @@ const addWS = async (req, res) => {
 
         if(response) {
             io.emit(`weatherstations${deviceId}`, WS)
+            emitThresholdAlerts('weatherstations', deviceId, requestBody)
         }
 
         res.status(200).json(WS)
