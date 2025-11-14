@@ -48,7 +48,7 @@ const PLTS = () => {
   const batteryLevel = latestInverterSRNE?.battery_level || 0;
   const vfdOutputPower = latestVFD?.output_power || 0;
   const thismonthenergy = latestInverterSolis?.this_month_energy || 0;
-  const totalBiayaKWH = thismonthenergy * tarifPerKWH;
+  const totalBiayaKWH = vfdOutputPower * tarifPerKWH;
 
   return (
     <div className="flex min-h-screen bg-[#F9F4F4]">
@@ -192,7 +192,7 @@ const PLTS = () => {
                 <h3 className="text-lg font-semibold text-gray-700">
                   Total KWH yang Dihasilkan
                 </h3>
-                <p className="text-4xl font-bold text-blue-600 mt-2">{thismonthenergy}</p>
+                <p className="text-4xl font-bold text-blue-600 mt-2">{vfdOutputPower}</p>
                 <p className="text-sm text-gray-600">KWH dalam satu bulan</p>
               </div>
 
