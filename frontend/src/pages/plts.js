@@ -192,11 +192,7 @@ const PLTS = () => {
                 <h3 className="text-lg font-semibold text-gray-700">
                   Total KWH yang Dihasilkan
                 </h3>
-<<<<<<< HEAD
                 <p className="text-4xl font-bold text-blue-600 mt-2">{vfdOutputPower}</p>
-=======
-                <p className="mt-2 text-4xl font-bold text-blue-600">{thismonthenergy}</p>
->>>>>>> 7b31fb6fb7056646815e9cc656736baf9a950627
                 <p className="text-sm text-gray-600">KWH dalam satu bulan</p>
               </div>
 
