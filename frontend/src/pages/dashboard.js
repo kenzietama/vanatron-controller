@@ -3,6 +3,8 @@ import Header from "../component/header";
 import galeri1 from "../gambar/galeri1.jpg";
 import vaname from "../gambar/vaname.jpg";
 import rangkaian from "../gambar/rangkaian.png";
+import diagram from "../gambar/diagram.png";
+import hardware from "../gambar/3dhardware.png";
 
 const Dashboard = () => {
   return (
@@ -30,6 +32,11 @@ const Dashboard = () => {
           Rangkaian Sistem
         </h2>
         <img
+          src={diagram}
+          alt="Diagram Sistem"
+          className="rounded-2xl shadow-lg mx-auto w-full sm:w-4/5 lg:w-3/4 object-contain"
+        />
+        <img
           src={rangkaian}
           alt="Rangkaian Sistem"
           className="rounded-2xl shadow-lg mx-auto w-full sm:w-4/5 lg:w-3/4 object-contain"
@@ -55,7 +62,7 @@ const Dashboard = () => {
         <div className="md:w-1/2 w-full h-60 sm:h-72 md:h-80 lg:h-96">
           <iframe
             className="w-full h-full rounded-2xl shadow-lg"
-            src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+            src="https://www.youtube.com/embed/5Da5scyju8Y"
             title="Video Penjelasan"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -96,7 +103,7 @@ const Dashboard = () => {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {[
-            { src: galeri1, label: "Panel Surya" },
+            { src: hardware, label: "3D Design Hardware" },
             { src: galeri1, label: "Turbin Air" },
             { src: galeri1, label: "Kontrol IoT" },
           ].map((item, i) => (
