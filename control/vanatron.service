@@ -1,0 +1,27 @@
+[Unit]
+Description=Vanatron Unified Service (Data Acquisition + Control)
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=vanatron
+Group=vanatron
+WorkingDirectory=/opt/vanatron
+ExecStart=/usr/bin/python3 /opt/vanatron/unified_service.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Environment variables
+Environment="API_BASE_URL=http://localhost:5000/api"
+Environment="SERIAL_PORT=/dev/ttyUSB0"
+Environment="LOG_LEVEL=INFO"
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
