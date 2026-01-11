@@ -3,7 +3,8 @@ from vanatronCenter import VanatronCenter
 
 if __name__ == "__main__":
     
-    vanatron = VanatronCenter(port='/dev/ttyUSB0')
+    # vanatron = VanatronCenter(port='/dev/ttyUSB0')
+    vanatron = VanatronCenter(port='COM5')
     
     vanatron.addVFD('vfd1', 10)
 

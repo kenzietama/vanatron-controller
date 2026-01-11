@@ -6,7 +6,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-class db:
+class ControlHistoryDB:
     def __init__(self, db_path: str):
         self.db_path = db_path
         self.init_database()

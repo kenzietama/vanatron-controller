@@ -5,9 +5,9 @@ import sys
 import threading
 from queue import Queue
 from vanatronCenter import VanatronCenter
-from api_client import APIClient
-from database import ControlHistoryDB
-from fis_controller import FISController
+from api.api_client import APIClient
+from fis.database import ControlHistoryDB
+from fis.fis_controller import FISController
 import config
 
 logging.basicConfig(
@@ -58,13 +58,17 @@ class VanatronService:
         """Setup all hardware devices"""
         logger.info("Setting up hardware devices...")
         
-        self.vanatron.addVanatronNode('node', config.VANATRON_NODE_SLAVE_ID)
+        # self.vanatron.addVanatronNode('node', config.VANATRON_NODE_SLAVE_ID)
         self.vanatron.addVFD('vfd', config.VFD_SLAVE_ID)
-        self.vanatron.addWeatherStation('weather', config.WEATHER_API_KEY, config.WEATHER_STATION_ID)
+        # self.vanatron.addWeatherStation('weather', config.WEATHER_API_KEY, config.WEATHER_STATION_ID)
         
-        self.vanatron.addGenericSensor('pyranometer', config.PYRANOMETER_SLAVE_ID)
-        self.vanatron.pyranometer.addRegister('radiasi', 0, 'holding', 1)
+        # self.vanatron.addGenericSensor('pyranometer', config.PYRANOMETER_SLAVE_ID)
+        # self.vanatron.pyranometer.addRegister('radiasi', 0, 'holding', 1)
         
+        self.vanatron.addGenericSensor('do_sensor', config.DO_SLAVE_ID)
+        self.vanatron.do_sensor.addRegister('dissolvedOxygen', 257, 'holding', 1)
+        self.vanatron.do_sensor.addRegister('suhu', 256, 'holding', 1)
+
         # self.vanatron.addGenericSensor('rtd', config.RTD_SLAVE_ID)
         # self.vanatron.rtd.addRegister('suhu_pv', 0, 'holding', 1)
         
@@ -78,10 +82,10 @@ class VanatronService:
             try:
                 cycle_start = time.time()
                 
-                self._read_vanatron_node()
+                # self._read_vanatron_node()
                 self._read_vfd()
                 self._read_generic_sensors()
-                self._read_weather()
+                # self._read_weather()
                 
                 elapsed = time.time() - cycle_start
                 sleep_time = max(0, config.DATA_ACQUISITION_INTERVAL - elapsed)
@@ -180,6 +184,9 @@ class VanatronService:
     def _initialize_control_state(self):
         """Initialize control state from last database record"""
         try:
+            self.vanatron.vfd.stop()
+            time.sleep(0.1)
+            self.vanatron.vfd.reset()
             last_record = self.db.get_last_record()
             
             if last_record and last_record['state'] == 'on' and last_record['mode'] == 'auto':
@@ -432,17 +439,25 @@ class VanatronService:
     def _read_generic_sensors(self):
         """Read and upload generic sensors"""
         try:
-            radiasi = self.vanatron.pyranometer.read('radiasi')
-            if radiasi is not None:
-                self.api.upload_pyranometer(radiasi)
-                logger.debug(f"Solar Radiation: {radiasi} W/m²")
+            # radiasi = self.vanatron.pyranometer.read('radiasi')
+            # if radiasi is not None:
+            #     self.api.upload_pyranometer(radiasi)
+            #     logger.debug(f"Solar Radiation: {radiasi} W/m²")
             
-            time.sleep(0.1)
+            # time.sleep(0.1)
             
             # suhu_pv = self.vanatron.rtd.read('suhu_pv')
             # if suhu_pv is not None:
             #     self.api.upload_rtd(suhu_pv)
             #     logger.debug(f"PV Surface Temp: {suhu_pv} °C")
+
+            do = self.vanatron.do_sensor.read('dissolvedOxygen') / 10
+            if do is not None:
+                with self.do_reading_lock:
+                    self.latest_do_reading = do
+                
+                self.api.upload_dissolved_oxygen(do)
+                logger.debug(f"Dissolved Oxygen: {do} mg/L")
             
         except Exception as e:
             logger.error(f"Error reading generic sensors: {e}")
