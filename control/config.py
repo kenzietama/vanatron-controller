@@ -28,8 +28,10 @@ WEATHER_UPDATE_INTERVAL = 3  # 5 minutes
 
 ## Control System Settings
 CONTROL_LOOP_INTERVAL = 3  # seconds
+CONTROL_LOOP_AUTO_INTERVAL = 10  # seconds
 FIS_MIN_POWER = 30  # minimum power percentage
 FIS_MAX_POWER = 100  # maximum power percentage
+HYBRID = False
 
 ## Database
 # DATABASE_PATH = '/opt/vanatron/control_history.db'
