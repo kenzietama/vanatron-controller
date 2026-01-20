@@ -45,5 +45,5 @@ class VanatronNode:
             print(f"Error: Digital Output Channel {channel} is invalid.")
             return False
             
-        return self.modbus.writeSingleCoil(coil_address=address, value=state, slaveID=self.slaveID)
+        return self.modbus.writeSingleCoil(coilAddress=address, value=state, slaveID=self.slaveID)
 

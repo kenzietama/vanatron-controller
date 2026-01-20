@@ -1,5 +1,8 @@
+import logging
 import time
 from controller.modbusController import ModbusController
+
+logger = logging.getLogger(__name__)
 
 class VFD:
     _REG_CMD = 8192
@@ -18,14 +21,41 @@ class VFD:
         self.slaveID = slaveID
         self.modbus = modbusController
         self.dataBuffer = {}
+        self.checkFault()
+
+    def checkFault(self) -> int | None:
+        self.updateBuffer()
+        faultCode = self.getCurrentFaultCode()
+        current_speed = self.getCurrentRunningFrequency()
+        if faultCode is not None and faultCode == 16:
+            logger.info(f"Communication fault detected on VFD initialization {self.name} (ID: {self.slaveID}): Code {faultCode}, refreshing VFD")
+            time.sleep(0.5)
+            lastSpeed = self.getCurrentSetFrequency()
+            time.sleep(0.5)
+            self.stop()
+            time.sleep(0.5)
+            self.reset()
+            time.sleep(0.5)
+            if( lastSpeed is not None and lastSpeed > 0 ):
+                logger.info(f"Setting {self.name} (ID: {self.slaveID}) speed to {lastSpeed}%...")
+                self.modbus.writeSingleRegister(
+                    registerAddress=self._REG_FREQ_SETPOINT, value=lastSpeed*2/100, slaveID=self.slaveID
+                )
+                time.sleep(0.5)
+                self.runForward()
+                time.sleep(0.5)
+                self.updateBuffer()
+        elif current_speed is not None and current_speed == 0:
+            self.runForward()
+            time.sleep(0.5)
 
     def setSpeed(self, speed: float) -> bool:
         if not 0.0 <= speed <= 100.0: 
             return False
-        
+        speed = round(speed, 2)
         register_value = int(speed * 100)
-        
-        print(f"Setting {self.name} (ID: {self.slaveID}) speed to {speed}%...")
+        self.checkFault()
+        logger.info(f"Setting {self.name} (ID: {self.slaveID}) speed to {speed}%...")
         success_freq = self.modbus.writeSingleRegister(
             registerAddress=self._REG_FREQ_SETPOINT, value=register_value, slaveID=self.slaveID
         )
@@ -33,31 +63,32 @@ class VFD:
         return success_freq
 
     def runForward(self) -> bool:
-        print(f"Running Forward {self.name} (ID: {self.slaveID})...")
+        logger.info(f"Running Forward {self.name} (ID: {self.slaveID})...")
         return self.modbus.writeSingleRegister(
             registerAddress=self._REG_CMD, value=self._CMD_RUN_FWD, slaveID=self.slaveID
         )
     
     def runBackward(self) -> bool:
-        print(f"Running Backward {self.name} (ID: {self.slaveID})...")
+        logger.info(f"Running Backward {self.name} (ID: {self.slaveID})...")
         return self.modbus.writeSingleRegister(
             registerAddress=self._REG_CMD, value=self._CMD_RUN_BKW, slaveID=self.slaveID
         )
 
     def stop(self) -> bool:
-        print(f"Stopping {self.name} (ID: {self.slaveID})...")
+        logger.info(f"Stopping {self.name} (ID: {self.slaveID})...")
         return self.modbus.writeSingleRegister(
             registerAddress=self._REG_CMD, value=self._CMD_STOP, slaveID=self.slaveID
         )
     
     def reset(self) -> bool:
-        print(f"Resetting {self.name} (ID: {self.slaveID})...")
+        logger.info(f"Resetting {self.name} (ID: {self.slaveID})...")
         return self.modbus.writeSingleRegister(
             registerAddress=self._REG_CMD, value=self._CMD_RESET, slaveID=self.slaveID
         )
 
     def updateBuffer(self) -> bool:
         try:
+            time.sleep(0.1)  # small delay to ensure communication stability
             allValues = self.modbus.readHoldingRegisters(
                 self._REG_MONITOR_START, self._REG_MONITOR_COUNT, self.slaveID
             )

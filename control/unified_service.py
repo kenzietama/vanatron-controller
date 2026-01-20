@@ -1,23 +1,24 @@
 """Unified Vanatron Service - Single process with threading"""
-import time
 import logging
 import sys
-import threading
-from queue import Queue
-from vanatronCenter import VanatronCenter
-from api.api_client import APIClient
-from fis.database import ControlHistoryDB
-from fis.fis_controller import FISController
 import config
 
 logging.basicConfig(
-    level=getattr(logging, config.LOG_LEVEL),
+    level=getattr(logging, config.LOG_LEVEL.upper(), logging.INFO),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler(config.LOG_FILE),
         logging.StreamHandler(sys.stdout)
     ]
 )
+
+import time
+import threading
+from vanatronCenter import VanatronCenter
+from api.api_client import APIClient
+from fis.database import ControlHistoryDB
+from fis.fis_controller import FISController
+
 logger = logging.getLogger(__name__)
 
 class VanatronService:
@@ -52,6 +53,8 @@ class VanatronService:
             'last_control_time': None  # NEW: Track last control execution time
         }
         
+        self.control_interval = config.CONTROL_LOOP_INTERVAL
+
         logger.info("Unified Service initialized successfully")
     
     def _setup_devices(self):
@@ -118,7 +121,7 @@ class VanatronService:
                 
                 if settings is None:
                     logger.warning("Failed to get control settings")
-                    time.sleep(config.CONTROL_LOOP_INTERVAL)
+                    time.sleep(self.control_interval)
                     continue
                 
                 state = settings.get('state', 'off')
@@ -127,13 +130,15 @@ class VanatronService:
                 manual_speed = float(settings.get('power_set_point', 50.0))
                 
                 # Get current DO reading
+                self._read_generic_sensors()  # Ensure latest reading
+                time.sleep(0.05)
                 with self.do_reading_lock:
                     do_reading = self.latest_do_reading
                 
                 # Handle missing DO reading
                 if do_reading is None:
                     logger.warning("No DO reading available, skipping control cycle")
-                    time.sleep(config.CONTROL_LOOP_INTERVAL)
+                    time.sleep(self.control_interval)
                     continue
                 
                 # Detect state/mode changes
@@ -165,12 +170,12 @@ class VanatronService:
                 self.control_state['last_control_time'] = time.time()
                 
                 # Periodic cleanup
-                if int(time.time()) % 86400 == 0:
-                    self.db.cleanup_old_records(30)
+                # if int(time.time()) % 86400 == 0:
+                #     self.db.cleanup_old_records(30)
                 
                 # Sleep
                 elapsed = time.time() - cycle_start
-                sleep_time = max(0, config.CONTROL_LOOP_INTERVAL - elapsed)
+                sleep_time = max(0, self.control_interval - elapsed)
                 
                 if sleep_time > 0:
                     time.sleep(sleep_time)
@@ -184,9 +189,6 @@ class VanatronService:
     def _initialize_control_state(self):
         """Initialize control state from last database record"""
         try:
-            self.vanatron.vfd.stop()
-            time.sleep(0.1)
-            self.vanatron.vfd.reset()
             last_record = self.db.get_last_record()
             
             if last_record and last_record['state'] == 'on' and last_record['mode'] == 'auto':
@@ -195,6 +197,8 @@ class VanatronService:
                 self.control_state['previous_mode'] = last_record['mode']
                 self.control_state['previous_state'] = last_record['state']
                 self.control_state['control_initialized'] = True
+
+                self.control_interval = config.CONTROL_LOOP_AUTO_INTERVAL
                 
                 logger.info(f"Initialized control state from database: "
                           f"previous_error={last_record['error']:.2f}, "
@@ -205,6 +209,8 @@ class VanatronService:
                 self.control_state['previous_mode'] = None
                 self.control_state['previous_state'] = None
                 self.control_state['control_initialized'] = False
+
+                self.control_interval = config.CONTROL_LOOP_INTERVAL
                 
                 logger.info("Starting control system with fresh state (no valid previous record)")
                 
@@ -213,7 +219,8 @@ class VanatronService:
             # Fail-safe: start fresh
             self.control_state['previous_error'] = None
             self.control_state['control_initialized'] = False
-    
+            self.control_interval = config.CONTROL_LOOP_INTERVAL
+            
     def _handle_state_change(self, new_state, mode, do_setpoint, do_reading):
         """Handle state transitions (on/off)"""
         if new_state == 'on':
@@ -250,94 +257,102 @@ class VanatronService:
     
     def _control_auto_mode(self, setpoint, reading):
         """Execute auto control mode using FIS with proper delta_error handling"""
-        try:
-            current_error = setpoint - reading
-            
-            # Calculate delta_error safely
-            if self.control_state['previous_error'] is None or not self.control_state['control_initialized']:
-                # First run or after mode change: assume delta_error = 0 (no change)
-                delta_error = 0.0
-                logger.info(f"Auto Control (FIRST RUN): Using delta_error = 0.0 (initialized)")
-            else:
-                # Check for large time gaps (e.g., after system restart)
-                if self.control_state['last_control_time'] is not None:
-                    time_gap = time.time() - self.control_state['last_control_time']
-                    if time_gap > config.CONTROL_LOOP_INTERVAL * 3:  # More than 3 cycles missed
-                        logger.warning(f"Large time gap detected ({time_gap:.1f}s), resetting delta_error")
-                        delta_error = 0.0
+        for attempt in range(3):
+            try:
+                current_error = setpoint - reading
+                
+                # Calculate delta_error safely
+                if self.control_state['previous_error'] is None or not self.control_state['control_initialized']:
+                    # First run or after mode change: assume delta_error = 0 (no change)
+                    delta_error = 0.0
+                    logger.info(f"Auto Control (FIRST RUN): Using delta_error = 0.0 (initialized)")
+                else:
+                    # Check for large time gaps (e.g., after system restart)
+                    if self.control_state['last_control_time'] is not None:
+                        time_gap = time.time() - self.control_state['last_control_time']
+                        if time_gap > config.CONTROL_LOOP_AUTO_INTERVAL * 3:  # More than 3 cycles missed
+                            logger.warning(f"Large time gap detected ({time_gap:.1f}s), resetting delta_error")
+                            delta_error = 0.0
+                        else:
+                            delta_error = current_error - self.control_state['previous_error']
                     else:
                         delta_error = current_error - self.control_state['previous_error']
-                else:
-                    delta_error = current_error - self.control_state['previous_error']
-            
-            # Update previous error for next cycle
-            self.control_state['previous_error'] = current_error
-            self.control_state['control_initialized'] = True
-            
-            # Use FIS to calculate speed
-            speed = self.fis.calculate_speed(current_error, delta_error)
-            
-            # Set VFD speed
-            self.vanatron.vfd.setSpeed(speed)
-            
-            # Store in database
-            self.db.insert_record(
-                do_setpoint=setpoint,
-                do_reading=reading,
-                error=current_error,
-                delta_error=delta_error,
-                vfd_speed=speed,
-                mode='auto',
-                state='on'
-            )
-            
-            logger.info(f"Auto Control - Setpoint: {setpoint:.2f}, Reading: {reading:.2f}, "
-                       f"Error: {current_error:.2f}, dError: {delta_error:.2f}, Speed: {speed:.2f}%")
-            
-            return speed
-        except Exception as e:
-            logger.error(f"Error in auto control mode: {e}")
+                
+                # Update previous error for next cycle
+                self.control_state['previous_error'] = current_error
+                self.control_state['control_initialized'] = True
+                
+                # Use FIS to calculate speed
+                speed = self.fis.calculate_speed(current_error, delta_error)
+                
+                # Set VFD speed
+                self.vanatron.vfd.setSpeed(speed)
+                
+                # Store in database
+                self.db.insert_record(
+                    do_setpoint=setpoint,
+                    do_reading=reading,
+                    error=current_error,
+                    delta_error=delta_error,
+                    vfd_speed=speed,
+                    mode='auto',
+                    state='on'
+                )
+                
+                logger.info(f"Auto Control - Setpoint: {setpoint:.2f}, Reading: {reading:.2f}, "
+                        f"Error: {current_error:.2f}, dError: {delta_error:.2f}, Speed: {speed:.2f}%")
+                
+                return speed
+            except Exception as e:
+                logger.error(f"Failed to execute auto control mode (attempt {attempt + 1}): {e}")
+                time.sleep(1 + attempt)
+        else:
+            logger.error("Failed to execute auto control mode after 3 attempts")
             return config.FIS_MIN_POWER
     
     def _control_manual_mode(self, manual_speed, setpoint, reading):
         """Execute manual control mode"""
-        try:
-            # Calculate error for logging only (not used for control)
-            current_error = setpoint - reading
-            
-            # In manual mode, delta_error is not meaningful for control
-            # but we calculate it for logging/monitoring purposes
-            if self.control_state['previous_error'] is not None:
-                delta_error = current_error - self.control_state['previous_error']
-            else:
-                delta_error = 0.0
-            
-            # Update previous error for continuity if switching to auto later
-            self.control_state['previous_error'] = current_error
-            
-            # Clamp manual speed
-            speed = max(config.FIS_MIN_POWER, min(config.FIS_MAX_POWER, manual_speed))
-            
-            # Set VFD speed
-            self.vanatron.vfd.setSpeed(speed)
-            
-            # Store in database
-            self.db.insert_record(
-                do_setpoint=setpoint,
-                do_reading=reading,
-                error=current_error,
-                delta_error=delta_error,
-                vfd_speed=speed,
-                mode='manual',
-                state='on'
-            )
-            
-            logger.info(f"Manual Control - Speed: {speed:.2f}%, Reading: {reading:.2f}, "
-                       f"Error: {current_error:.2f} (for monitoring only)")
-            
-            return speed
-        except Exception as e:
-            logger.error(f"Error in manual control mode: {e}")
+        for attempt in range(3):
+            try:
+                # Calculate error for logging only (not used for control)
+                current_error = setpoint - reading
+                
+                # In manual mode, delta_error is not meaningful for control
+                # but we calculate it for logging/monitoring purposes
+                if self.control_state['previous_error'] is not None:
+                    delta_error = current_error - self.control_state['previous_error']
+                else:
+                    delta_error = 0.0
+                
+                # Update previous error for continuity if switching to auto later
+                self.control_state['previous_error'] = current_error
+                
+                # Clamp manual speed
+                speed = max(config.FIS_MIN_POWER, min(config.FIS_MAX_POWER, manual_speed))
+                
+                # Set VFD speed
+                self.vanatron.vfd.setSpeed(speed)
+
+                # Store in database
+                self.db.insert_record(
+                    do_setpoint=setpoint,
+                    do_reading=reading,
+                    error=current_error,
+                    delta_error=delta_error,
+                    vfd_speed=speed,
+                    mode='manual',
+                    state='on'
+                )
+                
+                logger.info(f"Manual Control - Speed: {speed:.2f}%, Reading: {reading:.2f}, "
+                        f"Error: {current_error:.2f} (for monitoring only)")
+                
+                return speed
+            except Exception as e:
+                logger.warning(f"Failed to execute manual control mode (attempt {attempt + 1}): {e}")
+                time.sleep(1 + attempt)
+        else:
+            logger.error("Failed to execute manual control mode after 3 attempts")
             return config.FIS_MIN_POWER
     
     def _handle_off_state(self, setpoint, reading):
@@ -402,65 +417,71 @@ class VanatronService:
     
     def _read_vfd(self):
         """Read and upload VFD data"""
-        try:
-            if self.vanatron.vfd.updateBuffer():
-                vfd_data = {
-                    'running_frequency': self.vanatron.vfd.getRunningFrequency(),
-                    'set_frequency': self.vanatron.vfd.getSetFrequency(),
-                    'output_voltage': self.vanatron.vfd.getOutputVoltage(),
-                    'output_current': self.vanatron.vfd.getOutputCurrent(),
-                    'output_power': self.vanatron.vfd.getOutputPower(),
-                    'output_torque': self.vanatron.vfd.getOutputTorque(),
-                    'accumulative_poweron_time': self.vanatron.vfd.getAccumulativePowerOnTime(),
-                    'accumulative_running_time': self.vanatron.vfd.getAccumulativeRunningTime(),
-                    'pulse_input_frequency': self.vanatron.vfd.getPulseInputFrequency(),
-                    'main_frequency_x': self.vanatron.vfd.getMainFrequencyX(),
-                    'target_torque': self.vanatron.vfd.getTargetTorque(),
-                    'power_factor_angle': self.vanatron.vfd.getPowerFactorAngle(),
-                    'target_voltage_upon_vf_separation': self.vanatron.vfd.getTargetVoltageVFSeparation(),
-                    'output_voltage_upon_vf_separation': self.vanatron.vfd.getOutputVoltageVFSeparation(),
-                    'fault_information': self.vanatron.vfd.getFaultInformation(),
-                    'current_set_frequency': self.vanatron.vfd.getCurrentSetFrequency(),
-                    'current_running_frequency': self.vanatron.vfd.getCurrentRunningFrequency(),
-                    'ac_drive_running_state': self.vanatron.vfd.getACDriveRunningState(),
-                    'current_fault_code': self.vanatron.vfd.getCurrentFaultCode(),
-                    'torque_upper_limit': self.vanatron.vfd.getTorqueUpperLimit()
-                }
-                
-                vfd_data = {k: v for k, v in vfd_data.items() if v is not None}
-                
-                if vfd_data:
-                    self.api.upload_vfd(vfd_data)
-                    logger.debug(f"VFD: {vfd_data.get('running_frequency')} Hz")
-            
-        except Exception as e:
-            logger.error(f"Error reading VFD: {e}")
+        for attempt in range(3):  # Retry up to 3 times
+            try:
+                if self.vanatron.vfd.updateBuffer():
+                    vfd_data = {
+                        'running_frequency': self.vanatron.vfd.getRunningFrequency(),
+                        'set_frequency': self.vanatron.vfd.getSetFrequency(),
+                        'output_voltage': self.vanatron.vfd.getOutputVoltage(),
+                        'output_current': self.vanatron.vfd.getOutputCurrent(),
+                        'output_power': self.vanatron.vfd.getOutputPower(),
+                        'output_torque': self.vanatron.vfd.getOutputTorque(),
+                        'accumulative_poweron_time': self.vanatron.vfd.getAccumulativePowerOnTime(),
+                        'accumulative_running_time': self.vanatron.vfd.getAccumulativeRunningTime(),
+                        'pulse_input_frequency': self.vanatron.vfd.getPulseInputFrequency(),
+                        'main_frequency_x': self.vanatron.vfd.getMainFrequencyX(),
+                        'target_torque': self.vanatron.vfd.getTargetTorque(),
+                        'power_factor_angle': self.vanatron.vfd.getPowerFactorAngle(),
+                        'target_voltage_upon_vf_separation': self.vanatron.vfd.getTargetVoltageVFSeparation(),
+                        'output_voltage_upon_vf_separation': self.vanatron.vfd.getOutputVoltageVFSeparation(),
+                        'fault_information': self.vanatron.vfd.getFaultInformation(),
+                        'current_set_frequency': self.vanatron.vfd.getCurrentSetFrequency(),
+                        'current_running_frequency': self.vanatron.vfd.getCurrentRunningFrequency(),
+                        'ac_drive_running_state': self.vanatron.vfd.getACDriveRunningState(),
+                        'current_fault_code': self.vanatron.vfd.getCurrentFaultCode(),
+                        'torque_upper_limit': self.vanatron.vfd.getTorqueUpperLimit()
+                    }
+                    vfd_data = {k: v for k, v in vfd_data.items() if v is not None}
+                    if vfd_data:
+                        self.api.upload_vfd(vfd_data)
+                        logger.debug(f"VFD: {vfd_data.get('running_frequency')} Hz")
+                        break
+            except Exception as e:
+                logger.warning(f"VFD read failed (attempt {attempt+1}): {e}")
+                time.sleep(1 + attempt)
+        else:
+            logger.error("Failed to read VFD after 3 attempts")
     
     def _read_generic_sensors(self):
         """Read and upload generic sensors"""
-        try:
-            # radiasi = self.vanatron.pyranometer.read('radiasi')
-            # if radiasi is not None:
-            #     self.api.upload_pyranometer(radiasi)
-            #     logger.debug(f"Solar Radiation: {radiasi} W/m²")
-            
-            # time.sleep(0.1)
-            
-            # suhu_pv = self.vanatron.rtd.read('suhu_pv')
-            # if suhu_pv is not None:
-            #     self.api.upload_rtd(suhu_pv)
-            #     logger.debug(f"PV Surface Temp: {suhu_pv} °C")
-
-            do = self.vanatron.do_sensor.read('dissolvedOxygen') / 10
-            if do is not None:
-                with self.do_reading_lock:
-                    self.latest_do_reading = do
+        for attempt in range(3):  # Retry up to 3 times
+            try:
+                # radiasi = self.vanatron.pyranometer.read('radiasi')
+                # if radiasi is not None:
+                #     self.api.upload_pyranometer(radiasi)
+                #     logger.debug(f"Solar Radiation: {radiasi} W/m²")
                 
-                self.api.upload_dissolved_oxygen(do)
-                logger.debug(f"Dissolved Oxygen: {do} mg/L")
-            
-        except Exception as e:
-            logger.error(f"Error reading generic sensors: {e}")
+                # time.sleep(0.1)
+                
+                # suhu_pv = self.vanatron.rtd.read('suhu_pv')
+                # if suhu_pv is not None:
+                #     self.api.upload_rtd(suhu_pv)
+                #     logger.debug(f"PV Surface Temp: {suhu_pv} °C")
+
+                raw_do = self.vanatron.do_sensor.read('dissolvedOxygen')
+                if raw_do is not None:
+                    do = raw_do / 10.0  # Assuming sensor gives value in tenths of mg/L
+                    with self.do_reading_lock:
+                        self.latest_do_reading = do
+                    self.api.upload_dissolved_oxygen(do)
+                    logger.debug(f"Dissolved Oxygen: {do} mg/L")
+                    break
+            except Exception as e:
+                logger.warning(f"Error reading generic sensors (attempt {attempt+1}): {e}")
+                time.sleep(1 + attempt)
+        else:
+            logger.error("Failed to read generic sensors after 3 attempts")
     
     def _read_weather(self):
         """Read and upload Weather Station data"""
