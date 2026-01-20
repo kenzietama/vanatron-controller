@@ -74,8 +74,8 @@ class FISController:
         """Calculate VFD speed using FIS"""
         try:
             # Clamp inputs to valid ranges
-            error = np.clip(error, -10, 10)
-            delta_error = np.clip(delta_error, -5, 5)
+            error = np.clip(error, -1, 1)
+            delta_error = np.clip(delta_error, -0.5, 0.5)
             
             # Set inputs
             self.sim.input['error'] = error
