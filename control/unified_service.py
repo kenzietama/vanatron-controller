@@ -7,7 +7,7 @@ logging.basicConfig(
     level=getattr(logging, config.LOG_LEVEL.upper(), logging.INFO),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(config.LOG_FILE),
+        logging.FileHandler(config.LOG_FILE, encoding='utf-8'),
         logging.StreamHandler(sys.stdout)
     ]
 )
@@ -44,16 +44,36 @@ class VanatronService:
         self.do_reading_lock = threading.Lock()
         self.latest_do_reading = None
         
-        # Control state tracking - NEW
+        # Control state tracking
         self.control_state = {
-            'previous_error': None,  # Changed from 0.0 to None
+            'previous_error': None,
             'previous_mode': None,
             'previous_state': None,
-            'control_initialized': False,  # NEW: Track if control has been initialized
-            'last_control_time': None  # NEW: Track last control execution time
+            'control_initialized': False,
+            'last_control_time': None
         }
         
         self.control_interval = config.CONTROL_LOOP_INTERVAL
+
+        # --- SAFETY STATE (thread-safe via control_loop single-thread) ---
+        # Rule 1: API loss resilience – last-known settings cache
+        self.control_status = None          # 'manual' | 'auto' | None
+        self.last_api_state = 'off'         # 'on' | 'off'
+        self.last_api_mode = 'manual'
+        self.last_api_do_setpoint = 5.0
+        self.last_api_manual_speed = 50.0
+        self._api_offline_logged = False    # suppress repeated "API offline" logs
+
+        # Rule 2 & 3: Emergency DO hysteresis override
+        self.emergency_override = False
+        self._emergency_override_logged = False   # log once per activation
+        self.EMERGENCY_DO_LOW = 4.0         # mg/L - trigger threshold
+        self.EMERGENCY_DO_HIGH = 4.5        # mg/L - recovery threshold
+
+        # Rule 4: Sensor fault - consecutive null-DO cycle counter
+        self.null_do_cycles = 0
+        self._sensor_fault_logged = False          # log once per fault episode
+        self.SENSOR_FAULT_CYCLES = 2        # cycles before assuming sensor failure
 
         logger.info("Unified Service initialized successfully")
     
@@ -102,8 +122,87 @@ class VanatronService:
                 logger.error(f"Error in data acquisition loop: {e}", exc_info=True)
                 time.sleep(config.DATA_ACQUISITION_INTERVAL)
     
+    # -----------------------------------------------------------------
+    #  SAFETY HELPERS
+    # -----------------------------------------------------------------
+    def _update_emergency_override(self, do_reading: float | None):
+        """Rules 2 & 3 - Emergency low-DO hysteresis override.
+        
+        Trigger at < 4.0 mg/L, recover only at >= 4.5 mg/L.
+        Works regardless of online/offline state.
+        """
+        if do_reading is None:
+            return  # can't evaluate without a reading
+        if do_reading < self.EMERGENCY_DO_LOW and not self.emergency_override:
+            self.emergency_override = True
+            self._emergency_override_logged = False  # allow one CRITICAL log
+            logger.critical(
+                f"EMERGENCY OVERRIDE ACTIVATED - DO {do_reading:.2f} mg/L < {self.EMERGENCY_DO_LOW} mg/L  "
+                f"-> forcing VFD to {config.FIS_MAX_POWER}%"
+            )
+        elif do_reading >= self.EMERGENCY_DO_HIGH and self.emergency_override:
+            self.emergency_override = False
+            self._emergency_override_logged = False
+            logger.info(
+                f"Emergency override CLEARED - DO {do_reading:.2f} mg/L >= {self.EMERGENCY_DO_HIGH} mg/L  "
+                f"-> returning to normal control"
+            )
+
+    def _apply_emergency_speed(self, do_setpoint: float, do_reading: float):
+        """Force VFD to max power during emergency override and log to DB."""
+        speed = float(config.FIS_MAX_POWER)
+        self.vanatron.vfd.setSpeed(speed)
+        current_error = do_setpoint - do_reading
+        self.db.insert_record(
+            do_setpoint=do_setpoint, do_reading=do_reading,
+            error=current_error, delta_error=0.0,
+            vfd_speed=speed, mode='emergency', state='on'
+        )
+        # Log once per emergency episode, then DEBUG for ongoing cycles
+        if not self._emergency_override_logged:
+            logger.warning(
+                f"Emergency Override active - Speed: {speed:.0f}%, DO: {do_reading:.2f}, "
+                f"Setpoint: {do_setpoint:.2f}"
+            )
+            self._emergency_override_logged = True
+        else:
+            logger.debug(
+                f"Emergency Override ongoing - Speed: {speed:.0f}%, DO: {do_reading:.2f}"
+            )
+
+    def _apply_sensor_fault_speed(self, do_setpoint: float):
+        """Rule 4 - sensor fault: force 100% unless manual override."""
+        speed = float(config.FIS_MAX_POWER)
+        self.vanatron.vfd.setSpeed(speed)
+        self.db.insert_record(
+            do_setpoint=do_setpoint, do_reading=-1.0,
+            error=0.0, delta_error=0.0,
+            vfd_speed=speed, mode='sensor_fault', state='on'
+        )
+        # Log CRITICAL once per fault episode, then DEBUG for ongoing cycles
+        if not self._sensor_fault_logged:
+            logger.critical(
+                f"SENSOR FAULT FAILSAFE - {self.null_do_cycles} null cycles, "
+                f"forcing VFD to {speed:.0f}%"
+            )
+            self._sensor_fault_logged = True
+        else:
+            logger.debug(
+                f"Sensor fault ongoing - cycle {self.null_do_cycles}, VFD at {speed:.0f}%"
+            )
+
+    # -----------------------------------------------------------------
+    #  CONTROL LOOP (rewritten with safety rules)
+    # -----------------------------------------------------------------
     def control_loop(self):
-        """Thread for control system with proper state management"""
+        """Thread for control system with industrial fail-safe rules.
+        
+        Safety rules enforced:
+          1. API loss → maintain last-known mode (manual keeps speed, auto keeps FIS).
+          2. DO < 4.0 mg/L → emergency 100%%.
+          3. Hysteresis: stay 100%% until DO >= 4.5 mg/L.
+          4. >3 null DO cycles → assume sensor fault → 100%% (yields to manual).
+        """
         logger.info("Starting Control System Thread...")
         
         # Initial cleanup
@@ -116,62 +215,108 @@ class VanatronService:
             try:
                 cycle_start = time.time()
                 
-                # Get control settings
+                # ---- Rule 1: API fetch with fallback to last-known settings ----
                 settings = self.api.get_control_settings()
+                api_offline = settings is None
                 
-                if settings is None:
-                    logger.warning("Failed to get control settings")
-                    time.sleep(self.control_interval)
-                    continue
+                if api_offline:
+                    # Log only once per offline transition to keep logs clean
+                    if not self._api_offline_logged:
+                        logger.warning(
+                            "API unreachable – using last-known settings: "
+                            f"state={self.last_api_state}, mode={self.last_api_mode}"
+                        )
+                        self._api_offline_logged = True
+                    state = self.last_api_state
+                    mode = self.last_api_mode
+                    do_setpoint = self.last_api_do_setpoint
+                    manual_speed = self.last_api_manual_speed
+                else:
+                    if self._api_offline_logged:
+                        logger.info("API connection restored – using live settings")
+                        self._api_offline_logged = False
+                    state = settings.get('state', 'off')
+                    mode = settings.get('mode', 'manual')
+                    do_setpoint = float(settings.get('do_set_point', 5.0))
+                    manual_speed = float(settings.get('power_set_point', 50.0))
+                    # Cache for next offline cycle
+                    self.last_api_state = state
+                    self.last_api_mode = mode
+                    self.last_api_do_setpoint = do_setpoint
+                    self.last_api_manual_speed = manual_speed
+                    self.control_status = mode if state == 'on' else None
                 
-                state = settings.get('state', 'off')
-                mode = settings.get('mode', 'manual')
-                do_setpoint = float(settings.get('do_set_point', 5.0))
-                manual_speed = float(settings.get('power_set_point', 50.0))
-                
-                # Get current DO reading
-                self._read_generic_sensors()  # Ensure latest reading
-                time.sleep(0.05)
+                # ---- Get current DO reading (from data_acquisition_loop thread) ----
+                # Do NOT call _read_generic_sensors() here — the data thread
+                # already does that.  Calling it again blocks the control loop
+                # for 60-90 s when the sensor is offline (3×3 retries).
                 with self.do_reading_lock:
                     do_reading = self.latest_do_reading
                 
-                # Handle missing DO reading
-                if do_reading is None:
-                    logger.warning("No DO reading available, skipping control cycle")
-                    time.sleep(self.control_interval)
-                    continue
+                # ---- Rules 2 & 3: Emergency DO hysteresis ----
+                self._update_emergency_override(do_reading)
                 
-                # Detect state/mode changes
+                # ---- Rule 4: Sensor fault counter ----
+                if do_reading is None:
+                    self.null_do_cycles += 1
+                    if self.null_do_cycles <= self.SENSOR_FAULT_CYCLES:
+                        logger.warning(
+                            f"No DO reading (cycle {self.null_do_cycles}/{self.SENSOR_FAULT_CYCLES}), "
+                            f"skipping control cycle"
+                        )
+                        time.sleep(self.control_interval)
+                        continue
+                    else:
+                        # > SENSOR_FAULT_CYCLES missed → assume sensor failure
+                        if mode == 'manual':
+                            # Rule 4 yields to manual – technician has on-site control
+                            logger.warning(
+                                f"Sensor fault ({self.null_do_cycles} null cycles) but mode=manual "
+                                f"→ technician override, keeping manual speed {manual_speed:.1f}%%"
+                            )
+                            self.vanatron.vfd.setSpeed(
+                                max(config.FIS_MIN_POWER, min(config.FIS_MAX_POWER, manual_speed))
+                            )
+                            time.sleep(self.control_interval)
+                            continue
+                        else:
+                            # Auto or any non-manual → protect biomass at 100%%
+                            if state == 'on':
+                                self._apply_sensor_fault_speed(do_setpoint)
+                            time.sleep(self.control_interval)
+                            continue
+                else:
+                    self.null_do_cycles = 0  # reset on valid reading
+                    self._sensor_fault_logged = False  # allow re-logging if fault recurs
+                
+                # ---- Detect state/mode changes ----
                 state_changed = self.control_state['previous_state'] != state
                 mode_changed = self.control_state['previous_mode'] != mode
                 
-                # Handle state transitions
                 if state_changed:
                     logger.info(f"State changed: {self.control_state['previous_state']} -> {state}")
                     self._handle_state_change(state, mode, do_setpoint, do_reading)
                     self.control_state['previous_state'] = state
                 
-                # Handle mode transitions
                 if mode_changed and state == 'on':
                     logger.info(f"Mode changed: {self.control_state['previous_mode']} -> {mode}")
                     self._handle_mode_change(mode, do_setpoint, do_reading)
                     self.control_state['previous_mode'] = mode
                 
-                # Execute control logic
+                # ---- Execute control logic ----
                 if state == 'off':
                     self._handle_off_state(do_setpoint, do_reading)
                 elif state == 'on':
-                    if mode == 'auto':
+                    # Rules 2 & 3 take priority over normal control
+                    if self.emergency_override:
+                        self._apply_emergency_speed(do_setpoint, do_reading)
+                    elif mode == 'auto':
                         self._control_auto_mode(do_setpoint, do_reading)
                     elif mode == 'manual':
                         self._control_manual_mode(manual_speed, do_setpoint, do_reading)
                 
                 # Update last control time
                 self.control_state['last_control_time'] = time.time()
-                
-                # Periodic cleanup
-                # if int(time.time()) % 86400 == 0:
-                #     self.db.cleanup_old_records(30)
                 
                 # Sleep
                 elapsed = time.time() - cycle_start
@@ -256,21 +401,22 @@ class VanatronService:
             logger.info("Mode changed to MANUAL: Reset control state")
     
     def _control_auto_mode(self, setpoint, reading):
-        """Execute auto control mode using FIS with proper delta_error handling"""
+        """Execute auto control mode using FIS with proper delta_error handling.
+        
+        NOTE: Emergency override is checked BEFORE this method is called.
+        """
         for attempt in range(3):
             try:
                 current_error = setpoint - reading
                 
                 # Calculate delta_error safely
                 if self.control_state['previous_error'] is None or not self.control_state['control_initialized']:
-                    # First run or after mode change: assume delta_error = 0 (no change)
                     delta_error = 0.0
                     logger.info(f"Auto Control (FIRST RUN): Using delta_error = 0.0 (initialized)")
                 else:
-                    # Check for large time gaps (e.g., after system restart)
                     if self.control_state['last_control_time'] is not None:
                         time_gap = time.time() - self.control_state['last_control_time']
-                        if time_gap > config.CONTROL_LOOP_AUTO_INTERVAL * 3:  # More than 3 cycles missed
+                        if time_gap > config.CONTROL_LOOP_AUTO_INTERVAL * 3:
                             logger.warning(f"Large time gap detected ({time_gap:.1f}s), resetting delta_error")
                             delta_error = 0.0
                         else:
@@ -311,7 +457,10 @@ class VanatronService:
             return config.FIS_MIN_POWER
     
     def _control_manual_mode(self, manual_speed, setpoint, reading):
-        """Execute manual control mode"""
+        """Execute manual control mode.
+        
+        NOTE: Emergency override is checked BEFORE this method is called.
+        """
         for attempt in range(3):
             try:
                 # Calculate error for logging only (not used for control)
@@ -473,7 +622,7 @@ class VanatronService:
                 if raw_do is not None:
                     do = raw_do / 10.0  # Assuming sensor gives value in tenths of mg/L
                     with self.do_reading_lock:
-                        self.latest_do_reading = do
+                        self.latest_do_reading = do  # Calibration offset
                     self.api.upload_dissolved_oxygen(do)
                     logger.debug(f"Dissolved Oxygen: {do} mg/L")
                     break
@@ -481,7 +630,11 @@ class VanatronService:
                 logger.warning(f"Error reading generic sensors (attempt {attempt+1}): {e}")
                 time.sleep(1 + attempt)
         else:
-            logger.error("Failed to read generic sensors after 3 attempts")
+            # All retries exhausted - mark sensor as offline so control loop
+            # can count null cycles and trigger the sensor-fault failsafe.
+            with self.do_reading_lock:
+                self.latest_do_reading = None
+            logger.warning("DO sensor read failed after 3 attempts - reading cleared")
     
     def _read_weather(self):
         """Read and upload Weather Station data"""

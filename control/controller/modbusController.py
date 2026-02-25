@@ -121,10 +121,10 @@ class ModbusController:
                     return value
                 except Exception as e:
                     last_error = e
-                    logger.warning(f"Failed to ReadHoldingRegister on attempt {attempt+1} : {e}")
+                    logger.debug(f"ReadHoldingRegister attempt {attempt+1} failed: {e}")
                     time.sleep(1 + attempt)
                     continue
-        logger.error(f"Failed to ReadHoldingRegister after 3 attempts")
+        logger.warning(f"ReadHoldingRegister failed after 3 attempts (Slave: {slaveID}, Addr: {registerAddress})")
         if last_error is not None:
             self._handleError(last_error, "readHoldingRegister", targetSlaveID, registerAddress)
         else:
@@ -148,10 +148,10 @@ class ModbusController:
                     return value
                 except Exception as e:
                     last_error = e
-                    logger.warning(f"Failed to ReadHoldingRegisters on attempt {attempt+1} : {e}")
+                    logger.debug(f"ReadHoldingRegisters attempt {attempt+1} failed: {e}")
                     time.sleep(1 + attempt)
                     continue
-        logger.error(f"Failed to ReadHoldingRegisters after 3 attempts")
+        logger.warning(f"ReadHoldingRegisters failed after 3 attempts (Slave: {slaveID}, Addr: {start_address})")
         if last_error is not None:
             self._handleError(last_error, "readHoldingRegisters", targetSlaveID, start_address)
         else:
@@ -197,10 +197,10 @@ class ModbusController:
                     return True
                 except Exception as e:
                     last_error = e
-                    logger.warning(f"Failed to WriteSingleRegister on attempt {attempt+1} : {e}")
+                    logger.debug(f"WriteSingleRegister attempt {attempt+1} failed: {e}")
                     time.sleep(1 + attempt)
                     continue
-        logger.error(f"Failed to WriteSingleRegister after 3 attempts")
+        logger.warning(f"WriteSingleRegister failed after 3 attempts (Slave: {slaveID}, Addr: {registerAddress})")
         if last_error is not None:
             self._handleError(last_error, "writeSingleRegister", targetSlaveID, registerAddress)
         else:
@@ -233,18 +233,27 @@ class ModbusController:
                 return False
 
     def _handleError(self, error: Exception, function_name: str, slaveID: int, address: int):
-        logger.error(f"Error in {function_name} (Slave: {slaveID}, Address: {address}): {error}")
-        self.isConnected = False
-
         if isinstance(error, minimalmodbus.NoResponseError):
-            logger.warning("No response - possible device offline or bus issue")
+            # A slave not answering does NOT mean the serial bus is broken.
+            # Other slaves (e.g. VFD) may still be reachable on the same port.
+            # Do NOT disconnect the shared serial port here.
+            logger.debug(f"No response from slave {slaveID} addr {address} in {function_name}")
+        elif isinstance(error, minimalmodbus.InvalidResponseError):
+            # Garbled frame - flush buffers but keep connection alive.
+            logger.warning(f"Invalid response from slave {slaveID} addr {address} in {function_name}: {error}")
+            try:
+                if self.instrument and self.instrument.serial.is_open:
+                    self.instrument.serial.reset_input_buffer()
+                    self.instrument.serial.reset_output_buffer()
+            except Exception:
+                pass
         elif isinstance(error, (serial.SerialException, OSError, IOError)):
-            logger.warning("Serial error - recreating connection")
+            logger.error(f"Serial/OS error in {function_name} (Slave: {slaveID}, Addr: {address}): {error}")
             self.isConnected = False
             self.disconnect()
         elif "valid port handle" in str(error).lower():
-            logger.warning("Invalid handle - recreating connection")
+            logger.error(f"Invalid handle in {function_name} (Slave: {slaveID}, Addr: {address}): {error}")
             self.isConnected = False
             self.disconnect()
         else:
-            pass
+            logger.warning(f"Unhandled error in {function_name} (Slave: {slaveID}, Addr: {address}): {error}")

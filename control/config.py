@@ -3,10 +3,11 @@ import os
 
 ## API Configuration
 API_BASE_URL = os.getenv('API_BASE_URL', 'http://localhost:5000/api')
+# API_BASE_URL = os.getenv('API_BASE_URL', 'https://test.vanatron.danuaf.cloud/api')
 DEVICE_ID = 'A'
 
 ## Serial Port Configuration
-SERIAL_PORT = os.getenv('SERIAL_PORT', 'COM5')
+SERIAL_PORT = os.getenv('SERIAL_PORT', 'COM11')
 
 ## Weather Station Configuration
 WEATHER_API_KEY = '2385e72b9106446885e72b9106546878'
