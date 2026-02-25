@@ -618,9 +618,15 @@ class VanatronService:
                 #     self.api.upload_rtd(suhu_pv)
                 #     logger.debug(f"PV Surface Temp: {suhu_pv} °C")
 
+                raw_suhu = self.vanatron.do_sensor.read('suhu')
+                if raw_suhu is not None:
+                    suhu = round(raw_suhu, 2)  # Assuming sensor gives value in tenths of °C
+                    self.api.upload_water_temperature(suhu)
+                    logger.debug(f"Water Temp (DO Sensor): {suhu} °C")
+
                 raw_do = self.vanatron.do_sensor.read('dissolvedOxygen')
                 if raw_do is not None:
-                    do = raw_do / 10.0  # Assuming sensor gives value in tenths of mg/L
+                    do = round(raw_do / 10.0, 2)  # Assuming sensor gives value in tenths of mg/L
                     with self.do_reading_lock:
                         self.latest_do_reading = do  # Calibration offset
                     self.api.upload_dissolved_oxygen(do)
