@@ -84,12 +84,24 @@ class FISController:
             # Compute
             self.sim.compute()
             
-            # Get output and clamp to valid range
-            speed = self.sim.output['aerator_speed']
-            speed = np.clip(speed, self.min_power, self.max_power)
+            # Get raw output
+            speed = float(self.sim.output['aerator_speed'])
+            
+            print(f"FIS Output before adjustment: {speed:.2f}%")
+
+            # Apply snap-to-boundary and rounding logic
+            if speed >= self.max_power - 2.0:
+                speed = self.max_power  # Snaps 98.xx and 99.xx to Max
+            elif speed <= self.min_power + 2.0:
+                speed = self.min_power  # Snaps 50.xx and 51.xx (or 30.xx/31.xx) to Min
+            else:
+                speed = round(speed)    # Properly rounds 53.51 to 54.0
+            
+            # Final safety clamp
+            speed = float(np.clip(speed, self.min_power, self.max_power))
             
             logger.debug(f"FIS calculation - Error: {error:.2f}, dError: {delta_error:.2f}, Speed: {speed:.2f}%")
-            return float(speed)
+            return speed
         except Exception as e:
             logger.error(f"Error in FIS calculation: {e}")
             # Return safe default speed
