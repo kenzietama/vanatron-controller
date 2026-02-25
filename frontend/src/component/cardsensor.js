@@ -36,7 +36,7 @@ const CardSensor = ({
   currentInterval = 60,
   onIntervalChange,
   onRefresh,
-  graphReady = false
+  graphReady = false,
 }) => {
   const { isGraphRefreshing } = useDataStore();
   const [showDetail, setShowDetail] = useState(false);
@@ -46,13 +46,13 @@ const CardSensor = ({
     setSelectedInterval(currentInterval);
   }, [currentInterval, showDetail]);
 
-  // Fungsi untuk menghitung nilai tertinggi, terendah, dan rata-rata
-  const getHighestValue = () => Math.max(...data.map(item => item.value));
-  const getLowestValue = () => Math.min(...data.map(item => item.value));
+  // Hitung statistik
+  const getHighestValue = () => Math.max(...data.map((item) => item.value));
+  const getLowestValue = () => Math.min(...data.map((item) => item.value));
   const getAverageValue = () =>
     (data.reduce((acc, curr) => acc + curr.value, 0) / data.length).toFixed(2);
 
-  // Fungsi menentukan kelas warna angka
+  // Warna nilai
   const getValueClass = () => {
     if (value === null) return "text-gray-800";
     if (value < Number(minValue)) return "text-red-500";
@@ -60,12 +60,14 @@ const CardSensor = ({
     return "text-green-400";
   };
 
-  const minY = value !== null && minValue !== undefined ? Number(minValue) * 0.5 : 50;
-  const maxY = value !== null && maxValue !== undefined ? Number(maxValue) * 1.5 : 100;
+  const minY =
+    value !== null && minValue !== undefined ? Number(minValue) * 0.5 : 50;
+  const maxY =
+    value !== null && maxValue !== undefined ? Number(maxValue) * 1.5 : 100;
 
-  // Konfigurasi chart
+  // Chart data
   const chartData = {
-    labels: data.map(item => {
+    labels: data.map((item) => {
       try {
         const date = new Date(item.createdAt);
         return isNaN(date) ? "Invalid Date" : date.toLocaleString();
@@ -76,7 +78,7 @@ const CardSensor = ({
     datasets: [
       {
         label: "Sensor Value",
-        data: data.map(item => item.value),
+        data: data.map((item) => item.value),
         borderColor: "#1d4ed8",
         backgroundColor: "rgba(29, 78, 216, 0.1)",
         fill: true,
@@ -94,13 +96,21 @@ const CardSensor = ({
     scales: {
       x: {
         reverse: true,
-        title: { display: true, text: "Waktu", font: { size: 14, weight: "bold" } },
+        title: {
+          display: true,
+          text: "Waktu",
+          font: { size: 14, weight: "bold" },
+        },
       },
       y: {
         ticks: { stepSize: 5 },
         min: minY,
         max: maxY,
-        title: { display: true, text: unit || "Unit", font: { size: 14, weight: "bold" } },
+        title: {
+          display: true,
+          text: unit || "Unit",
+          font: { size: 14, weight: "bold" },
+        },
       },
     },
   };
@@ -127,6 +137,7 @@ const CardSensor = ({
       <h2 className="text-xl font-bold" style={{ fontFamily: "Inter, sans-serif" }}>
         {name}
       </h2>
+
       <p
         className={`text-4xl font-semibold ${getValueClass()}`}
         style={{ fontFamily: "Inter, sans-serif" }}
@@ -137,7 +148,7 @@ const CardSensor = ({
       {graphReady ? (
         <div className="justify-center mt-2">
           <button
-            className="mt-2 font-bold underline text-black-500"
+            className="mt-2 font-bold underline"
             onClick={() => setShowDetail(true)}
           >
             Detail
@@ -151,16 +162,26 @@ const CardSensor = ({
 
       {showDetail && graphReady && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500 bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-[70%] md:w-[65%] lg:w-[45%] max-w-5xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-left">{name} Details</h3>
-              <div className="flex gap-2">
+          <div
+            className="
+              bg-white rounded-lg shadow-lg
+              p-4 md:p-6
+              w-[95%] sm:w-[90%] md:w-[65%] lg:w-[45%]
+              max-w-5xl
+            "
+          >
+            {/* Header */}
+            <div className="flex flex-col gap-3 mb-4 md:flex-row md:items-center md:justify-between">
+              <h3 className="text-xl font-bold text-left">
+                {name} Details
+              </h3>
+
+              <div className="flex flex-wrap gap-2">
                 <select
                   aria-label="Interval"
                   value={selectedInterval}
                   onChange={handleIntervalChange}
                   className="h-9 min-w-[140px] border border-gray-300 rounded-md px-2 py-1 text-sm disabled:opacity-60"
-                  title="Select interval"
                   disabled={isGraphRefreshing}
                 >
                   <option value={3}>3 seconds</option>
@@ -170,10 +191,8 @@ const CardSensor = ({
                 </select>
 
                 <button
-                  type="button"
-                  className="inline-flex items-center justify-center transition rounded-lg w-9 h-9 hover:bg-gray-200 disabled:opacity-60"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-gray-200 disabled:opacity-60"
                   onClick={handleRefresh}
-                  title={isGraphRefreshing ? "Refreshing..." : "Refresh"}
                   disabled={isGraphRefreshing}
                 >
                   {isGraphRefreshing ? (
@@ -184,42 +203,49 @@ const CardSensor = ({
                 </button>
 
                 <button
-                  type="button"
-                  className="inline-flex items-center justify-center transition rounded-lg w-9 h-9 hover:bg-gray-200"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-gray-200"
                   onClick={downloadChart}
-                  title="Download Chart"
                 >
                   <Download className="w-5 h-5 text-blue-600" />
                 </button>
 
                 <button
-                  type="button"
-                  className="inline-flex items-center justify-center transition rounded-lg w-9 h-9 hover:bg-gray-200"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-gray-200"
                   onClick={() => setShowDetail(false)}
-                  title="Close"
                 >
                   <X className="w-5 h-5 text-blue-600" />
                 </button>
               </div>
             </div>
 
-            <div className="flex flex-col gap-6 text-left md:flex-row">
-              <div className="flex flex-col w-full gap-4 md:w-1/4">
-                <div className="p-4 text-left border border-gray-300 rounded shadow-md">
+            {/* Content */}
+            <div className="flex flex-col gap-6 md:flex-row">
+              {/* Parameter */}
+              <div className="grid grid-cols-3 gap-3 w-full md:w-1/4 md:grid-cols-1">
+                <div className="p-4 border border-gray-300 rounded shadow-md h-full">
                   <p className="font-bold text-green-700">Highest</p>
-                  <p className="text-3xl font-bold text-blue-500">{getHighestValue()}</p>
+                  <p className="text-2xl md:text-3xl font-bold text-blue-500">
+                    {getHighestValue()}
+                  </p>
                 </div>
-                <div className="p-4 text-left border border-gray-300 rounded shadow-md">
+
+                <div className="p-4 border border-gray-300 rounded shadow-md h-full">
                   <p className="font-bold text-yellow-700">Average</p>
-                  <p className="text-3xl font-bold text-blue-500">{getAverageValue()}</p>
+                  <p className="text-2xl md:text-3xl font-bold text-blue-500">
+                    {getAverageValue()}
+                  </p>
                 </div>
-                <div className="p-4 text-left border border-gray-300 rounded shadow-md">
+
+                <div className="p-4 border border-gray-300 rounded shadow-md h-full">
                   <p className="font-bold text-red-700">Lowest</p>
-                  <p className="text-3xl font-bold text-blue-500">{getLowestValue()}</p>
+                  <p className="text-2xl md:text-3xl font-bold text-blue-500">
+                    {getLowestValue()}
+                  </p>
                 </div>
               </div>
 
-              <div className="w-full md:w-2/3" style={{ height: "300px" }}>
+              {/* Chart */}
+              <div className="w-full md:w-2/3 h-[220px] sm:h-[260px] md:h-[300px]">
                 <Line data={chartData} options={chartOptions} />
               </div>
             </div>

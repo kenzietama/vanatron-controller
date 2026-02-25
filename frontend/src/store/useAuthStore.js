@@ -1,6 +1,6 @@
 import { create } from "zustand"
-import {axiosInstance} from "../lib/axios"
-import {io} from "socket.io-client"
+import { axiosInstance } from "../lib/axios"
+import { io } from "socket.io-client"
 import toast from "react-hot-toast";
 
 const BASE_URL = process.env.REACT_APP_BACKEND_URL
@@ -13,50 +13,52 @@ export const useAuthStore = create((set, get) => ({
     isCheckingAuth: true,
 
     checkAuth: async () => {
-        set({isCheckingAuth: true});
+        set({ isCheckingAuth: true });
         try {
             const res = await axiosInstance.get("/auth/check");
 
-            set({authAccount: res.data});
+            set({ authAccount: res.data });
             get().connectSocket()
         } catch (error) {
-            set({authAccount: null});
+            set({ authAccount: null });
         } finally {
-            set({isCheckingAuth: false});
+            set({ isCheckingAuth: false });
         }
     },
 
     login: async (data) => {
-        set({isLoggingIn: true});
+        set({ isLoggingIn: true });
         try {
             const res = await axiosInstance.post("/auth/login", data);
-            set({authAccount: res.data});
+            set({ authAccount: res.data });
             toast.success("Logged in successfully");
 
             get().connectSocket()
         } catch (error) {
-            set({errorMessage: error.response.data.message});
+            set({ errorMessage: error?.response?.data?.message });
+            throw error; // 🔥 INI YANG MEMBUAT PESAN LOGIN MUNCUL
         } finally {
-            set({isLoggingIn: false});
+            set({ isLoggingIn: false });
         }
     },
 
     logout: async () => {
         try {
             await axiosInstance.post("/auth/logout");
-            set({authAccount: null});
+            set({ authAccount: null });
             toast.success("Logged out successfully");
 
             get().disconnectSocket()
         } catch (error) {
-            set({errorMessage: error.response.data.message});
+            set({ errorMessage: error?.response?.data?.message });
+            throw error; // (opsional, tapi konsisten & rapi)
         }
     },
 
     connectSocket: () => {
         const socket = io(BASE_URL);
         socket.connect()
-        set({socket: socket})
+        set({ socket: socket })
     },
 
     disconnectSocket: () => {

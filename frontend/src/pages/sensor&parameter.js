@@ -89,24 +89,27 @@ const SensorParameter = () => {
       <div className="flex flex-col flex-1">
         {/* Header */}
         <Header
-          pageName="Sensor & Parameter"
-          databaseName="Database / Sensor & Parameter"
-          notifications={0}
+          pageName="Sensors & Parameters"
         />
 
         <div className="flex-1 p-6">
           <div className="p-6 mb-6 bg-white border border-gray-300 rounded-lg shadow-lg">
-            {/* 🔍 Search + Add */}
-            <div className="flex flex-col items-center justify-between mb-6 space-y-3 sm:flex-row sm:space-y-0">
-              <div className="relative w-full sm:w-1/2">
+            {/* Search + Add Data */}
+              <div className="flex flex-col items-center justify-between gap-4 mb-6 sm:flex-row">
+                <div className="relative w-full sm:flex-1 sm:max-w-3xl">
                 <input
                   type="text"
                   placeholder="Search"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full h-10 pl-4 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  className="w-full h-10 pl-4 pr-12 text-sm border border-gray-300 rounded-lg sm:text-base"
                 />
-                <Search className="absolute text-gray-600 transform -translate-y-1/2 right-3 top-1/2" />
+                <button
+                  onClick={() => console.log("Search:", searchTerm)}
+                  className="absolute p-2 text-black transform -translate-y-1/2 rounded-md right-2 top-1/2"
+                >
+                  <Search className="w-5 h-5" />
+                </button>
               </div>
 
               <button
@@ -123,17 +126,17 @@ const SensorParameter = () => {
                 <p className="text-center text-gray-700">Loading data...</p>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm border border-collapse border-gray-200">
+                  <table className="hidden min-w-full mb-6 table-auto sm:table">
                     <thead className="bg-gray-200">
                       <tr>
-                        <th className="px-3 py-2 font-semibold text-left text-gray-700">Sensor</th>
-                        <th className="px-3 py-2 font-semibold text-left text-gray-700">Device</th>
-                        <th className="px-3 py-2 font-semibold text-left text-gray-700">Parameter</th>
-                        <th className="px-3 py-2 font-semibold text-left text-gray-700">Name</th>
-                        <th className="px-3 py-2 font-semibold text-left text-gray-700">Unit</th>
-                        <th className="px-3 py-2 font-semibold text-left text-gray-700">Min</th>
-                        <th className="px-3 py-2 font-semibold text-left text-gray-700">Max</th>
-                        <th className="px-3 py-2 font-semibold text-center text-gray-700">Action</th>
+                        <th className="px-3 py-2 text-sm font-medium text-left text-gray-700">Sensor</th>
+                        <th className="px-3 py-2 text-sm font-medium text-left text-gray-700">Device</th>
+                        <th className="px-3 py-2 text-sm font-medium text-left text-gray-700">Parameter</th>
+                        <th className="px-3 py-2 text-sm font-medium text-left text-gray-700">Name</th>
+                        <th className="px-3 py-2 text-sm font-medium text-left text-gray-700">Unit</th>
+                        <th className="px-3 py-2 text-sm font-medium text-left text-gray-700">Min</th>
+                        <th className="px-3 py-2 text-sm font-medium text-left text-gray-700">Max</th>
+                        <th className="px-3 py-2 text-sm font-medium text-center text-gray-700">Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -145,18 +148,10 @@ const SensorParameter = () => {
                               index % 2 === 0 ? "bg-gray-50" : "bg-white"
                             } hover:bg-gray-100`}
                           >
-                            <td className="px-3 py-2 break-words whitespace-normal">
-                              {data.sensor}
-                            </td>
-                            <td className="px-3 py-2 break-words whitespace-normal">
-                              {data.device}
-                            </td>
-                            <td className="px-3 py-2 break-words whitespace-normal">
-                              {data.parameter}
-                            </td>
-                            <td className="px-3 py-2 break-words whitespace-normal">
-                              {data.displayName}
-                            </td>
+                            <td className="px-3 py-2 break-words whitespace-normal">{data.sensor}</td>
+                            <td className="px-3 py-2 break-words whitespace-normal">{data.device}</td>
+                            <td className="px-3 py-2 break-words whitespace-normal">{data.parameter}</td>
+                            <td className="px-3 py-2 break-words whitespace-normal">{data.displayName}</td>
                             <td className="px-3 py-2">{data.unit}</td>
                             <td className="px-3 py-2 text-center">{data.minValue ?? "-"}</td>
                             <td className="px-3 py-2 text-center">{data.maxValue ?? "-"}</td>
@@ -229,36 +224,45 @@ const SensorParameter = () => {
           </div>
         </div>
 
-        {/* 🔹 Modal */}
+        {/* Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="p-6 bg-white rounded-lg w-80 sm:w-96">
+          <div className="fixed inset-0 flex items-center justify-center px-4 bg-gray-500 bg-opacity-50">
+            <div className="w-full max-w-sm p-6 bg-white rounded-lg shadow-lg sm:max-w-md">
               <h3
-                className={`text-lg font-semibold ${
+                className={`text-base sm:text-lg font-semibold mb-4 ${
                   modalType === "success"
-                    ? "text-green-600"
+                    ? "text-green-500"
                     : modalType === "error"
-                    ? "text-red-600"
+                    ? "text-red-500"
                     : "text-gray-800"
                 }`}
               >
                 {modalMessage}
               </h3>
-              <div className="flex justify-end mt-4 space-x-3">
-                {modalType === "info" && (
+              <div className="flex justify-end space-x-4">
+                {modalType === "info" ? (
+                  <>
+                    <button
+                      onClick={handleCloseModal}
+                      className="px-4 py-2 text-sm text-gray-800 bg-gray-300 rounded-full hover:bg-gray-400"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleDeleteData}
+                      className="px-4 py-2 text-sm text-white bg-red-500 rounded-full hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </>
+                ) : (
                   <button
-                    onClick={handleDeleteData}
-                    className="px-4 py-2 text-white bg-red-500 rounded-full hover:bg-red-600"
+                    onClick={handleCloseModal}
+                    className="px-4 py-2 text-sm text-gray-800 bg-gray-300 rounded-full hover:bg-gray-400"
                   >
-                    Confirm
+                    Close
                   </button>
                 )}
-                <button
-                  onClick={handleCloseModal}
-                  className="px-4 py-2 text-white bg-gray-500 rounded-full hover:bg-gray-600"
-                >
-                  Close
-                </button>
               </div>
             </div>
           </div>

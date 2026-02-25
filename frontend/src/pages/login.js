@@ -27,8 +27,28 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     const success = validateForm();
+
     if (success === true) {
-      await login(formData);
+      try {
+        await login(formData);
+      } catch (error) {
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          "Login failed";
+
+        if (message.toLowerCase().includes("password")) {
+          toast.error("Password salah");
+        } else if (message.toLowerCase().includes("not active")) {
+          toast.error("Akun tidak aktif");
+        } else if (message.toLowerCase().includes("not found")) {
+          toast.error("Akun tidak tersedia");
+        } else if (message.toLowerCase().includes("email")) {
+          toast.error("Akun salah");
+        } else {
+          toast.error("Wrong email or password or account is inactive");
+        }
+      }
     }
   };
 
@@ -39,7 +59,7 @@ const Login = () => {
         <div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-black bg-opacity-40">
           <div className="absolute flex items-center top-4 left-4">
             <img src={logo} alt="Logo" className="w-10 h-10 mr-2" />
-            <span className="text-xl">Admin</span>
+            <span className="text-xl">Vanatron</span>
           </div>
           <h1 className="mb-4 text-4xl md:text-5xl">Welcome Back!</h1>
           <p className="px-6 text-lg text-center md:px-12">

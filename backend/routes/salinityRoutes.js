@@ -1,18 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const {
-    getSalinityData,
+    getSalinity,
     getSalinityGraph,
-    addSalinityData
+    addSalinity
 } = require('../controllers/salinityController')
 
 
 //get
-router.get('/', getSalinityData);
+router.get('/', getSalinity);
 
 router.get('/graph', getSalinityGraph)
 
 //post
-router.post('/:deviceId', addSalinityData);
+router.post('/:deviceId', addSalinity);
 
 module.exports = router;

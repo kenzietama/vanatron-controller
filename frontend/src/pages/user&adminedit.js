@@ -27,14 +27,19 @@ const EditUserAdmin = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/accounts/${_id}`);
+        const response = await fetch(
+          `${process.env.REACT_APP_BACKEND_URL}/api/accounts/${_id}`
+        );
         if (!response.ok) throw new Error("Failed to fetch user data");
         const user = await response.json();
+
         setPhoto(user.photo || null);
         setName(user.name);
         setEmail(user.email);
         setRole(user.role);
-        setStatus(user.status?.toLowerCase() === "active" ? "Active" : "Non Active");
+        setStatus(
+          user.status?.toLowerCase() === "active" ? "Active" : "Non Active"
+        );
       } catch (error) {
         console.error("Error fetching user data:", error);
         setErrorMessage("Failed to fetch user data. Please try again.");
@@ -58,10 +63,11 @@ const EditUserAdmin = () => {
   const toggleShowPassword = () => setShowPassword((prev) => !prev);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     setLoading(true);
 
-    const processedPhoto = photo?.replace(/^data:image\/[a-z]+;base64,/, "") || null;
+    const processedPhoto =
+      photo?.replace(/^data:image\/[a-z]+;base64,/, "") || null;
 
     const updatedUser = {
       name,
@@ -74,18 +80,23 @@ const EditUserAdmin = () => {
     if (password) updatedUser.password = password;
 
     try {
-      const response = await fetch(process.env.REACT_APP_BACKEND_URL + `/api/accounts/${_id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedUser),
-      });
+      const response = await fetch(
+        process.env.REACT_APP_BACKEND_URL + `/api/accounts/${_id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedUser),
+        }
+      );
 
       if (!response.ok) throw new Error("Failed to update user");
 
       navigate("/user&admin");
     } catch (error) {
       console.error("Error updating user:", error);
-      setErrorMessage("Failed to update user. Please check your inputs and try again.");
+      setErrorMessage(
+        "Failed to update user. Please check your inputs and try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -97,35 +108,36 @@ const EditUserAdmin = () => {
     <div className="flex min-h-screen bg-[#F9F4F4]">
       <div className="flex flex-col flex-1">
         {/* Header */}
-        <Header
-          pageName="Edit Users Admin"
-          databaseName="Database / List Users Admin / Edit Users Admin"
-          notifications={0}
-        />
+        <Header pageName="Edit Users Admin" />
 
         <div className="flex justify-center flex-1 p-6">
           <div className="w-full max-w-5xl p-6 bg-white border border-gray-300 rounded-lg shadow-lg">
-            {/* Top Section */}
-            <div className="flex flex-col items-start justify-between gap-4 mb-6 md:flex-row md:items-center">
+            {/* ================= TOP BUTTONS (DESKTOP ONLY) ================= */}
+            <div className="items-center justify-between hidden gap-4 mb-6 md:flex">
               <h2 className="text-2xl font-semibold text-gray-800">
                 Edit Users Admin
               </h2>
-              <div className="flex flex-col w-full gap-3 sm:flex-row md:w-auto">
+              <div className="flex gap-3">
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="w-full px-6 py-2 text-sm font-semibold text-white transition bg-blue-500 rounded-full sm:w-36 hover:bg-blue-600"
+                  className="w-36 px-6 py-2 text-sm font-semibold text-white bg-blue-500 rounded-full hover:bg-blue-600 disabled:opacity-60"
                 >
                   {loading ? "Saving..." : "Save"}
                 </button>
                 <button
                   onClick={handleBack}
-                  className="w-full px-6 py-2 text-sm font-semibold text-blue-500 transition bg-white border border-blue-500 rounded-full sm:w-36 hover:bg-blue-600 hover:text-white"
+                  className="w-36 px-6 py-2 text-sm font-semibold text-blue-500 bg-white border border-blue-500 rounded-full hover:bg-blue-600 hover:text-white"
                 >
                   Back
                 </button>
               </div>
             </div>
+
+            {/* ================= TITLE (MOBILE & TABLET) ================= */}
+            <h2 className="block mb-6 text-2xl font-semibold text-gray-800 md:hidden">
+              Edit Users Admin
+            </h2>
 
             {errorMessage && (
               <div className="p-4 mb-4 text-red-700 bg-red-100 rounded-lg">
@@ -133,12 +145,11 @@ const EditUserAdmin = () => {
               </div>
             )}
 
-            {/* ================= MOBILE VERSION ================= */}
+            {/* ================= MOBILE FORM ================= */}
             <form
               onSubmit={handleSubmit}
               className="block space-y-6 divide-y divide-gray-200 md:hidden"
             >
-              {/* Photo */}
               <div className="flex flex-col items-start gap-4 pt-2 sm:flex-row">
                 <label className="text-sm font-medium text-gray-700">
                   Photo
@@ -164,35 +175,36 @@ const EditUserAdmin = () => {
               </div>
 
               <div className="grid grid-cols-1 gap-6 pt-6 sm:grid-cols-2">
-                {/* Name */}
                 <div className="flex flex-col">
-                  <label className="text-sm font-medium text-gray-700">Name</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Name
+                  </label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="h-10 px-4 mt-1 border border-gray-300 rounded-lg"
-                    placeholder="Enter Name"
                     required
                   />
                 </div>
 
-                {/* Email */}
                 <div className="flex flex-col">
-                  <label className="text-sm font-medium text-gray-700">Email</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Email
+                  </label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="h-10 px-4 mt-1 border border-gray-300 rounded-lg"
-                    placeholder="Enter Email"
                     required
                   />
                 </div>
 
-                {/* Role */}
                 <div className="flex flex-col">
-                  <label className="text-sm font-medium text-gray-700">Role</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Role
+                  </label>
                   <select
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
@@ -206,9 +218,10 @@ const EditUserAdmin = () => {
                   </select>
                 </div>
 
-                {/* Status */}
                 <div className="flex flex-col">
-                  <label className="text-sm font-medium text-gray-700">Status</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Status
+                  </label>
                   <div className="flex gap-4 mt-1">
                     <label className="flex items-center gap-2">
                       <input
@@ -216,7 +229,6 @@ const EditUserAdmin = () => {
                         value="Active"
                         checked={status === "Active"}
                         onChange={(e) => setStatus(e.target.value)}
-                        className="w-4 h-4"
                       />
                       <span>Active</span>
                     </label>
@@ -226,16 +238,16 @@ const EditUserAdmin = () => {
                         value="Non Active"
                         checked={status === "Non Active"}
                         onChange={(e) => setStatus(e.target.value)}
-                        className="w-4 h-4"
                       />
                       <span>Non Active</span>
                     </label>
                   </div>
                 </div>
 
-                {/* Password */}
                 <div className="flex flex-col sm:col-span-2">
-                  <label className="text-sm font-medium text-gray-700">Password</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Password
+                  </label>
                   <div className="relative mt-1">
                     <input
                       type={showPassword ? "text" : "password"}
@@ -246,7 +258,7 @@ const EditUserAdmin = () => {
                     />
                     <span
                       onClick={toggleShowPassword}
-                      className="absolute text-gray-600 cursor-pointer top-2 right-3 hover:text-gray-800"
+                      className="absolute text-gray-600 cursor-pointer top-2 right-3"
                     >
                       {showPassword ? (
                         <EyeOff className="w-5 h-5" />
@@ -259,14 +271,15 @@ const EditUserAdmin = () => {
               </div>
             </form>
 
-            {/* ================= DESKTOP/TABLET VERSION ================= */}
+            {/* ================= DESKTOP / TABLET FORM ================= */}
             <form
               onSubmit={handleSubmit}
               className="hidden mt-4 space-y-4 md:block"
             >
-              {/* Photo */}
-              <div className="flex items-center justify-start ml-4 space-x-4">
-                <label className="w-1/4 text-sm font-medium text-gray-700">Photo</label>
+              <div className="flex items-center ml-4 space-x-4">
+                <label className="w-1/4 text-sm font-medium text-gray-700">
+                  Photo
+                </label>
                 <div className="relative">
                   <div className="flex items-center justify-center w-24 h-24 overflow-hidden bg-black border border-gray-300 rounded-full">
                     {photo ? (
@@ -287,39 +300,40 @@ const EditUserAdmin = () => {
                 </div>
               </div>
 
-              {/* Name */}
-              <div className="flex items-center justify-start ml-4 space-x-4">
-                <label className="w-1/4 text-sm font-medium text-gray-700">Name</label>
+              <div className="flex items-center ml-4 space-x-4">
+                <label className="w-1/4 text-sm font-medium text-gray-700">
+                  Name
+                </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-3/4 h-10 px-4 py-1 border border-gray-300 rounded-lg"
-                  placeholder="Enter Name"
+                  className="w-3/4 h-10 px-4 border border-gray-300 rounded-lg"
                   required
                 />
               </div>
 
-              {/* Email */}
-              <div className="flex items-center justify-start ml-4 space-x-4">
-                <label className="w-1/4 text-sm font-medium text-gray-700">Email</label>
+              <div className="flex items-center ml-4 space-x-4">
+                <label className="w-1/4 text-sm font-medium text-gray-700">
+                  Email
+                </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-3/4 h-10 px-4 py-1 border border-gray-300 rounded-lg"
-                  placeholder="Enter Email"
+                  className="w-3/4 h-10 px-4 border border-gray-300 rounded-lg"
                   required
                 />
               </div>
 
-              {/* Role */}
-              <div className="flex items-center justify-start ml-4 space-x-4">
-                <label className="w-1/4 text-sm font-medium text-gray-700">Role</label>
+              <div className="flex items-center ml-4 space-x-4">
+                <label className="w-1/4 text-sm font-medium text-gray-700">
+                  Role
+                </label>
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
-                  className="w-3/4 h-10 px-4 py-1 border border-gray-300 rounded-lg"
+                  className="w-3/4 h-10 px-4 border border-gray-300 rounded-lg"
                   required
                 >
                   <option value="">Select Role</option>
@@ -329,9 +343,10 @@ const EditUserAdmin = () => {
                 </select>
               </div>
 
-              {/* Status */}
-              <div className="flex items-center justify-start ml-4 space-x-4">
-                <label className="w-1/4 text-sm font-medium text-gray-700">Status</label>
+              <div className="flex items-center ml-4 space-x-4">
+                <label className="w-1/4 text-sm font-medium text-gray-700">
+                  Status
+                </label>
                 <div className="flex space-x-4">
                   <label className="flex items-center space-x-2">
                     <input
@@ -339,7 +354,6 @@ const EditUserAdmin = () => {
                       value="Active"
                       checked={status === "Active"}
                       onChange={(e) => setStatus(e.target.value)}
-                      className="w-4 h-4"
                     />
                     <span>Active</span>
                   </label>
@@ -349,27 +363,26 @@ const EditUserAdmin = () => {
                       value="Non Active"
                       checked={status === "Non Active"}
                       onChange={(e) => setStatus(e.target.value)}
-                      className="w-4 h-4"
                     />
                     <span>Non Active</span>
                   </label>
                 </div>
               </div>
 
-              {/* Password */}
-              <div className="flex items-center justify-start ml-4 space-x-4">
-                <label className="w-1/4 text-sm font-medium text-gray-700">Password</label>
+              <div className="flex items-center ml-4 space-x-4">
+                <label className="w-1/4 text-sm font-medium text-gray-700">
+                  Password
+                </label>
                 <div className="relative w-3/4">
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-10 px-4 py-1 border border-gray-300 rounded-lg"
-                    placeholder="Enter New Password (optional)"
+                    className="w-full h-10 px-4 border border-gray-300 rounded-lg"
                   />
                   <span
                     onClick={toggleShowPassword}
-                    className="absolute text-gray-600 cursor-pointer top-2 right-2 hover:text-gray-800"
+                    className="absolute text-gray-600 cursor-pointer top-2 right-2"
                   >
                     {showPassword ? (
                       <EyeOff className="w-6 h-6" />
@@ -380,6 +393,23 @@ const EditUserAdmin = () => {
                 </div>
               </div>
             </form>
+
+            {/* ================= BOTTOM BUTTONS (MOBILE & TABLET) ================= */}
+            <div className="flex flex-col gap-3 mt-8 md:hidden">
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="w-full px-6 py-3 text-sm font-semibold text-white bg-blue-500 rounded-full hover:bg-blue-600 disabled:opacity-60"
+              >
+                {loading ? "Saving..." : "Save"}
+              </button>
+              <button
+                onClick={handleBack}
+                className="w-full px-6 py-3 text-sm font-semibold text-blue-500 bg-white border border-blue-500 rounded-full hover:bg-blue-600 hover:text-white"
+              >
+                Back
+              </button>
+            </div>
           </div>
         </div>
       </div>

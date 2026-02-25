@@ -42,8 +42,6 @@ const Monitoring = () => {
         {/* Header */}
         <Header
           pageName="Monitoring"
-          databaseName="Database / Monitoring"
-          notifications={0}
         />
 
         <div className="flex flex-col gap-6 p-4 sm:p-6 md:p-8">

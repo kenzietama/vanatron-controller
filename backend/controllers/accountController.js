@@ -12,7 +12,7 @@ const upload = multer({
 }).single("photo");
 
 // Path ke foto default
-const defaultPhotoPath = "D:/Capstone/frontend/src/gambar/profiledefault.png"
+const defaultPhotoPath = "D:/Capstone-Asli/frontend/src/gambar/profiledefault.png"
 
 // Tambahkan akun
 const addAccount = (req, res) => {

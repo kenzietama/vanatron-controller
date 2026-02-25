@@ -73,8 +73,6 @@ const UserAdmin = () => {
         {/* Header */}
         <Header
           pageName="Users Admin"
-          databaseName="Database / List Users Admin"
-          notifications={0}
         />
 
         <div className="flex h-full">
@@ -136,9 +134,7 @@ const UserAdmin = () => {
                           />
                         </td>
                         <td className="px-3 py-2 text-sm text-gray-800">{data.name}</td>
-                        <td className="px-3 py-2 text-sm text-gray-800 break-all">
-                          {data.email}
-                        </td>
+                        <td className="px-3 py-2 text-sm text-gray-800 break-all">{data.email}</td>
                         <td className="px-3 py-2 text-sm text-gray-800">{data.role}</td>
                         <td className="px-3 py-2 text-center">
                           <span

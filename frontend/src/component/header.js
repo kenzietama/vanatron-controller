@@ -9,7 +9,6 @@ const Header = ({ pageName, databaseName }) => {
       {/* Bagian kiri */}
       <div>
         <h1 className="text-xl font-bold">{pageName}</h1>
-        <p className="text-sm text-gray-600">{databaseName}</p>
       </div>
 
       {/* Bagian kanan: Notifikasi */}

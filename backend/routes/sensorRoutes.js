@@ -11,18 +11,12 @@ const {
 
 const router = express.Router();
 
-router.get('/update', updateSensors);
-
-router.post('/add', addSensor);
-
 router.get('/', getSensors);
-
-router.get('/:id', getSensor);
-
-router.delete('/:id', deleteSensor);
-
-router.put('/:id', editSensor);
-
+router.get('/update', updateSensors);
+router.post('/add', addSensor);
 router.get('/:name/devices', getDevices)
+router.get('/:id', getSensor);
+router.put('/:id', editSensor);
+router.delete('/:id', deleteSensor);
 
 module.exports = router;

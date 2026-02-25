@@ -6,13 +6,23 @@ const { emitThresholdAlerts } = require('../lib/thresholdNotifier.js');
 
 //get
 const getRTDData = async (req, res) => {
-    const rtd = await mongoose.connection.db.collection('rtds').find({}).sort({createdAt: -1}).limit(1).toArray()
-    res.status(200).json(rtd);
+    try {
+        const RTD = await mongoose.connection.db.collection('rtds').find({}).sort({createdAt: -1}).limit(1).toArray()
+        res.status(200).json(RTD);
+    } catch (error) {
+        console.error("Error fetching RTD Data:", error);
+        res.status(500).json({error: error.message})
+    }
 }
 
 const getRTDGraph = async (req, res) => {
-    const rtd = await mongoose.connection.db.collection('rtds').find({}).sort({createdAt: -1}).limit(10).toArray()
-    res.status(200).json(rtd);
+    try {
+        const RTD = await mongoose.connection.db.collection('rtds').find({}).sort({createdAt: -1}).limit(10).toArray()
+        res.status(200).json(RTD);
+    } catch (error) {
+        console.error("Error fetching RTD Graph:", error);
+        res.status(500).json({error: error.message})
+    }
 }
 
 //post
@@ -33,13 +43,13 @@ const addRTDData = async (req, res) => {
                 })
             }
         }
-        const rtddata = await rtd.create(requestBody)
+        const RTD = await rtd.create(requestBody)
 
         if(response) {
-            io.emit(`rtds${deviceId}`, rtddata)
+            io.emit(`rtds${deviceId}`, RTD)
             emitThresholdAlerts('rtds', deviceId, requestBody)
         }
-        res.status(200).json(response)
+        res.status(200).json(RTD)
     } catch (error) {
         res.status(400).json({error: error.message})
     }

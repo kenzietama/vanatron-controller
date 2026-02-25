@@ -29,7 +29,7 @@ const CreateUserAdmin = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
 
     const formData = new FormData();
     formData.append("name", name);
@@ -37,16 +37,20 @@ const CreateUserAdmin = () => {
     formData.append("password", password);
     formData.append("role", role);
     formData.append("status", status.toLowerCase());
+
     if (photo) {
       const file = await fetch(photo).then((res) => res.blob());
       formData.append("photo", file);
     }
 
     try {
-      const response = await fetch(process.env.REACT_APP_BACKEND_URL + "/api/accounts/add", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        process.env.REACT_APP_BACKEND_URL + "/api/accounts/add",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       const result = await response.json();
       if (response.ok) {
@@ -67,34 +71,36 @@ const CreateUserAdmin = () => {
     <div className="flex min-h-screen bg-[#F9F4F4]">
       <div className="flex flex-col flex-1">
         {/* Header */}
-        <Header
-          pageName="Create Users Admin"
-          databaseName="Database / List Users Admin / Create Users Admin"
-          notifications={0}
-        />
+        <Header pageName="Add Users Admin" />
 
         <div className="flex justify-center flex-1 p-6">
           <div className="w-full max-w-5xl p-6 bg-white border border-gray-300 rounded-lg shadow-lg">
-            {/* Top Buttons */}
-            <div className="flex flex-col items-start justify-between gap-4 mb-6 md:flex-row md:items-center">
+            {/* Top Buttons - Desktop only */}
+            <div className="items-center justify-between hidden gap-4 mb-6 md:flex">
               <h2 className="text-2xl font-semibold text-gray-800">
-                Create Users Admin
+                Add Users Admin
               </h2>
-              <div className="flex flex-col w-full gap-3 sm:flex-row md:w-auto">
+
+              <div className="flex gap-3">
                 <button
                   onClick={handleSubmit}
-                  className="w-full px-6 py-2 text-sm font-semibold text-white transition bg-blue-500 rounded-full sm:w-36 hover:bg-blue-600"
+                  className="w-36 px-6 py-2 text-sm font-semibold text-white transition bg-blue-500 rounded-full hover:bg-blue-600"
                 >
                   Save
                 </button>
                 <button
                   onClick={handleBack}
-                  className="w-full px-6 py-2 text-sm font-semibold text-blue-500 transition bg-white border border-blue-500 rounded-full sm:w-36 hover:bg-blue-600 hover:text-white"
+                  className="w-36 px-6 py-2 text-sm font-semibold text-blue-500 transition bg-white border border-blue-500 rounded-full hover:bg-blue-600 hover:text-white"
                 >
                   Back
                 </button>
               </div>
             </div>
+
+            {/* Title - Mobile & Tablet */}
+            <h2 className="block mb-6 text-2xl font-semibold text-gray-800 md:hidden">
+              Add Users Admin
+            </h2>
 
             {errorMessage && (
               <div className="p-4 mb-4 text-red-700 bg-red-100 rounded-lg">
@@ -102,7 +108,7 @@ const CreateUserAdmin = () => {
               </div>
             )}
 
-            {/* Mobile*/}
+            {/* Mobile Form */}
             <form
               onSubmit={handleSubmit}
               className="block space-y-6 divide-y divide-gray-200 md:hidden"
@@ -189,7 +195,6 @@ const CreateUserAdmin = () => {
                         value="Active"
                         checked={status === "Active"}
                         onChange={(e) => setStatus(e.target.value)}
-                        className="w-4 h-4"
                       />
                       <span>Active</span>
                     </label>
@@ -199,7 +204,6 @@ const CreateUserAdmin = () => {
                         value="Non Active"
                         checked={status === "Non Active"}
                         onChange={(e) => setStatus(e.target.value)}
-                        className="w-4 h-4"
                       />
                       <span>Non Active</span>
                     </label>
@@ -216,11 +220,11 @@ const CreateUserAdmin = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full h-10 px-4 border border-gray-300 rounded-lg"
-                      placeholder="Enter New Password (optional)"
+                      placeholder="Enter New Password"
                     />
                     <span
                       onClick={toggleShowPassword}
-                      className="absolute text-gray-600 cursor-pointer top-2 right-3 hover:text-gray-800"
+                      className="absolute text-gray-600 cursor-pointer top-2 right-3"
                     >
                       {showPassword ? (
                         <EyeOff className="w-5 h-5" />
@@ -233,12 +237,12 @@ const CreateUserAdmin = () => {
               </div>
             </form>
 
-            {/* Desktop / Tablet*/}
+            {/* Desktop / Tablet Form */}
             <form
               onSubmit={handleSubmit}
               className="hidden mt-4 space-y-4 md:block"
             >
-              <div className="flex items-center justify-start ml-4 space-x-4">
+              <div className="flex items-center ml-4 space-x-4">
                 <label className="w-1/4 text-sm font-medium text-gray-700">
                   Photo
                 </label>
@@ -263,7 +267,7 @@ const CreateUserAdmin = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-start ml-4 space-x-4">
+              <div className="flex items-center ml-4 space-x-4">
                 <label className="w-1/4 text-sm font-medium text-gray-700">
                   Name
                 </label>
@@ -271,13 +275,12 @@ const CreateUserAdmin = () => {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-3/4 h-10 px-4 py-1 border border-gray-300 rounded-lg"
-                  placeholder="Enter Name"
+                  className="w-3/4 h-10 px-4 border border-gray-300 rounded-lg"
                   required
                 />
               </div>
 
-              <div className="flex items-center justify-start ml-4 space-x-4">
+              <div className="flex items-center ml-4 space-x-4">
                 <label className="w-1/4 text-sm font-medium text-gray-700">
                   Email
                 </label>
@@ -285,20 +288,19 @@ const CreateUserAdmin = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-3/4 h-10 px-4 py-1 border border-gray-300 rounded-lg"
-                  placeholder="Enter Email"
+                  className="w-3/4 h-10 px-4 border border-gray-300 rounded-lg"
                   required
                 />
               </div>
 
-              <div className="flex items-center justify-start ml-4 space-x-4">
+              <div className="flex items-center ml-4 space-x-4">
                 <label className="w-1/4 text-sm font-medium text-gray-700">
                   Role
                 </label>
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
-                  className="w-3/4 h-10 px-4 py-1 border border-gray-300 rounded-lg"
+                  className="w-3/4 h-10 px-4 border border-gray-300 rounded-lg"
                   required
                 >
                   <option value="">Select Role</option>
@@ -308,7 +310,7 @@ const CreateUserAdmin = () => {
                 </select>
               </div>
 
-              <div className="flex items-center justify-start ml-4 space-x-4">
+              <div className="flex items-center ml-4 space-x-4">
                 <label className="w-1/4 text-sm font-medium text-gray-700">
                   Status
                 </label>
@@ -319,7 +321,6 @@ const CreateUserAdmin = () => {
                       value="Active"
                       checked={status === "Active"}
                       onChange={(e) => setStatus(e.target.value)}
-                      className="w-4 h-4"
                     />
                     <span>Active</span>
                   </label>
@@ -329,14 +330,13 @@ const CreateUserAdmin = () => {
                       value="Non Active"
                       checked={status === "Non Active"}
                       onChange={(e) => setStatus(e.target.value)}
-                      className="w-4 h-4"
                     />
                     <span>Non Active</span>
                   </label>
                 </div>
               </div>
 
-              <div className="flex items-center justify-start ml-4 space-x-4">
+              <div className="flex items-center ml-4 space-x-4">
                 <label className="w-1/4 text-sm font-medium text-gray-700">
                   Password
                 </label>
@@ -345,12 +345,11 @@ const CreateUserAdmin = () => {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-10 px-4 py-1 border border-gray-300 rounded-lg"
-                    placeholder="Enter New Password (optional)"
+                    className="w-full h-10 px-4 border border-gray-300 rounded-lg"
                   />
                   <span
                     onClick={toggleShowPassword}
-                    className="absolute text-gray-600 cursor-pointer top-2 right-2 hover:text-gray-800"
+                    className="absolute text-gray-600 cursor-pointer top-2 right-2"
                   >
                     {showPassword ? (
                       <EyeOff className="w-6 h-6" />
@@ -361,6 +360,22 @@ const CreateUserAdmin = () => {
                 </div>
               </div>
             </form>
+
+            {/* Bottom Buttons - Mobile & Tablet */}
+            <div className="flex flex-col gap-3 mt-8 md:hidden">
+              <button
+                onClick={handleSubmit}
+                className="w-full px-6 py-3 text-sm font-semibold text-white bg-blue-500 rounded-full hover:bg-blue-600"
+              >
+                Save
+              </button>
+              <button
+                onClick={handleBack}
+                className="w-full px-6 py-3 text-sm font-semibold text-blue-500 bg-white border border-blue-500 rounded-full hover:bg-blue-600 hover:text-white"
+              >
+                Back
+              </button>
+            </div>
           </div>
         </div>
       </div>

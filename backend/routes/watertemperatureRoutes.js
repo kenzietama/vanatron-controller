@@ -1,18 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const {
-    getWatertemperatureData,
+    getWatertemperature,
     getWatertemperatureGraph,
-    addWatertemperatureData
+    addWatertemperature
 } = require('../controllers/watertemperatureController')
 
 
 //get
-router.get('/', getWatertemperatureData);
+router.get('/', getWatertemperature);
 
 router.get('/graph', getWatertemperatureGraph)
 
 //post
-router.post('/:deviceId', addWatertemperatureData);
+router.post('/:deviceId', addWatertemperature);
 
 module.exports = router;

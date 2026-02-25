@@ -5,22 +5,32 @@ const displayItem = require('../models/displayItem');
 const { emitThresholdAlerts } = require('../lib/thresholdNotifier.js');
 
 //get
-const getSalinityData = async (req, res) => {
-    const salinity = await mongoose.connection.db.collection('salinity').find({}).sort({createdAt: -1}).limit(1).toArray()
-    res.status(200).json(salinity);
+const getSalinity = async (req, res) => {
+    try {
+        const salinity = await mongoose.connection.db.collection('salinities').find({}).sort({createdAt: -1}).limit(1).toArray()
+        res.status(200).json(salinity);
+    } catch (error) {
+        console.error("Error fetching Salinity:", error);
+        res.status(500).json({error: error.message})
+    }
 }
 
 const getSalinityGraph = async (req, res) => {
-    const salinity = await mongoose.connection.db.collection('salinity').find({}).sort({createdAt: -1}).limit(10).toArray()
-    res.status(200).json(salinity);
+    try {
+        const salinity = await mongoose.connection.db.collection('salinities').find({}).sort({createdAt: -1}).limit(10).toArray()
+        res.status(200).json(salinity);
+    } catch (error) {
+        console.error("Error fetching Salinity Graph:", error);
+        res.status(500).json({error: error.message})
+    }
 }
 
 //post
-const addSalinityData = async (req, res) => {
+const addSalinity = async (req, res) => {
     const requestBody = req.body
     const { deviceId } = req.params
 
-    const response = await displayItem.find({sensor: 'salinity', device: deviceId}).limit(1)
+    const response = await displayItem.find({sensor: 'salinities', device: deviceId}).limit(1)
 
     try {
         requestBody.deviceId = deviceId
@@ -36,8 +46,8 @@ const addSalinityData = async (req, res) => {
         const salinity = await sal.create(requestBody)
 
         if(response) {
-            io.emit(`salinity${deviceId}`, salinity)
-            emitThresholdAlerts('salinity', deviceId, requestBody)
+            io.emit(`salinities${deviceId}`, salinity)
+            emitThresholdAlerts('salinities', deviceId, requestBody)
         }
         res.status(200).json(salinity)
     } catch (error) {
@@ -47,7 +57,7 @@ const addSalinityData = async (req, res) => {
 
 
 module.exports = {
-    getSalinityData,
+    getSalinity,
     getSalinityGraph,
-    addSalinityData
+    addSalinity
 }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Header from "../component/header";
 import galeri1 from "../gambar/galeri1.jpg";
 import vaname from "../gambar/vaname.jpg";
@@ -7,14 +7,12 @@ import diagram from "../gambar/diagram.png";
 import hardware from "../gambar/3dhardware.png";
 
 const Dashboard = () => {
+  const [previewImage, setPreviewImage] = useState(null);
+
   return (
     <div className="flex flex-col min-h-screen bg-[#F9F4F4]">
       {/* Header */}
-      <Header
-        pageName="Dashboard"
-        databaseName="Home / Dashboard"
-        notifications={3}
-      />
+      <Header pageName="Dashboard" />
 
       {/* Hero Section */}
       <section className="text-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-cyan-100 to-blue-200 shadow-md">
@@ -31,21 +29,55 @@ const Dashboard = () => {
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">
           Rangkaian Sistem
         </h2>
-        <img
-          src={diagram}
-          alt="Diagram Sistem"
-          className="rounded-2xl shadow-lg mx-auto w-full sm:w-4/5 lg:w-3/4 object-contain"
-        />
-        <img
-          src={rangkaian}
-          alt="Rangkaian Sistem"
-          className="rounded-2xl shadow-lg mx-auto w-full sm:w-4/5 lg:w-3/4 object-contain"
-        />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          <div
+            className="cursor-pointer"
+            onClick={() => setPreviewImage(diagram)}
+          >
+            <img
+              src={diagram}
+              alt="Diagram Sistem"
+              className="rounded-xl shadow-md w-full h-56 object-contain bg-white p-3 hover:scale-105 transition"
+            />
+            <p className="mt-2 text-sm text-gray-600">Diagram Sistem</p>
+          </div>
+
+          <div
+            className="cursor-pointer"
+            onClick={() => setPreviewImage(rangkaian)}
+          >
+            <img
+              src={rangkaian}
+              alt="Rangkaian Sistem"
+              className="rounded-xl shadow-md w-full h-56 object-contain bg-white p-3 hover:scale-105 transition"
+            />
+            <p className="mt-2 text-sm text-gray-600">Rangkaian Alat</p>
+          </div>
+        </div>
       </section>
+
+      {/* Modal Preview Gambar */}
+      {previewImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+          <div className="relative max-w-6xl w-full px-4">
+            <button
+              onClick={() => setPreviewImage(null)}
+              className="absolute -top-10 right-4 text-white text-3xl font-bold hover:text-gray-300"
+            >
+              ✕
+            </button>
+            <img
+              src={previewImage}
+              alt="Preview"
+              className="w-full max-h-[80vh] object-contain rounded-xl shadow-2xl bg-white p-4"
+            />
+          </div>
+        </div>
+      )}
 
       {/* Latar Belakang + Video */}
       <section className="px-4 sm:px-8 py-12 bg-white flex flex-col md:flex-row items-center gap-8">
-        {/* Teks */}
         <div className="md:w-1/2 text-left">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">
             Latar Belakang
@@ -58,7 +90,7 @@ const Dashboard = () => {
             produktif.
           </p>
         </div>
-        {/* Video */}
+
         <div className="md:w-1/2 w-full h-60 sm:h-72 md:h-80 lg:h-96">
           <iframe
             className="w-full h-full rounded-2xl shadow-lg"
@@ -73,7 +105,6 @@ const Dashboard = () => {
 
       {/* Tentang Udang Vaname */}
       <section className="px-4 sm:px-8 py-12 bg-gradient-to-r from-gray-100 to-gray-200 flex flex-col md:flex-row items-center gap-8">
-        {/* Penjelasan */}
         <div className="md:w-1/2 text-left">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">
             Mengenal Udang Vaname
@@ -82,11 +113,10 @@ const Dashboard = () => {
             Udang Vaname (Litopenaeus vannamei) adalah salah satu komoditas
             unggulan budidaya perikanan. Pertumbuhannya cepat, tahan penyakit,
             dan memiliki permintaan pasar yang tinggi baik dalam negeri maupun
-            ekspor. Karena itulah, vaname menjadi pilihan utama petambak di
-            Indonesia.
+            ekspor.
           </p>
         </div>
-        {/* Gambar */}
+
         <div className="md:w-1/2 w-full">
           <img
             src={vaname}
@@ -102,11 +132,7 @@ const Dashboard = () => {
           Galeri Sistem
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {[
-            { src: hardware, label: "3D Design Hardware" },
-            { src: galeri1, label: "Turbin Air" },
-            { src: galeri1, label: "Kontrol IoT" },
-          ].map((item, i) => (
+          {[{ src: hardware, label: "3D Design Hardware" }, { src: galeri1, label: "Turbin Air" }, { src: galeri1, label: "Kontrol IoT" }].map((item, i) => (
             <div
               key={i}
               className="bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition-transform"

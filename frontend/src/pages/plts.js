@@ -54,7 +54,9 @@ const PLTS = () => {
     <div className="flex min-h-screen bg-[#F9F4F4]">
       <div className="flex flex-col flex-1">
         {/* Header */}
-        <Header pageName="PLTS" databaseName="Database / PLTS" notifications={0} />
+        <Header 
+          pageName="PLTS" 
+        />
 
         {/* Konten utama */}
         <div className="flex flex-col items-center justify-center w-full p-6">

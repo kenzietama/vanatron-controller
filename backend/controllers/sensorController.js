@@ -110,7 +110,7 @@ const getDevices = async (req, res) => {
 const getSensor = async (req, res) => {
   try {
     const { id } = req.params;
-    const sensor = await Sensor.findOne({ customId: id });
+    const sensor = await Sensor.findOne(id);
     if (!sensor) {
       return res.status(404).json({ message: "Sensor not found." });
     }
@@ -125,7 +125,7 @@ const getSensor = async (req, res) => {
 const deleteSensor = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedSensor = await Sensor.findOneAndDelete({ customId: id });
+    const deletedSensor = await Sensor.findOneAndDelete(id);
 
     if (!deletedSensor) {
       return res.status(404).json({ message: "Sensor not found." });
@@ -151,7 +151,7 @@ const editSensor = async (req, res) => {
 
     // Update data sensor
     const updatedSensor = await Sensor.findOneAndUpdate(
-      { customId: id },
+      { id },
       { name, path },
       { new: true, runValidators: true }
     );

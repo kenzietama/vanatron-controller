@@ -31,7 +31,7 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Tombol Hamburger (kiri atas layar) */}
+      {/* Tombol Hamburger */}
       {!isNavbarOpen && (
         <button
           className="fixed top-24 left-4 z-50 bg-[#055E6E] text-white p-2 rounded-md shadow-md hover:bg-[#044b58]"
@@ -47,7 +47,7 @@ const Navbar = () => {
           isNavbarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Tombol silang di dalam navbar */}
+        {/* Tombol close */}
         <div className="flex justify-end px-4 pt-4">
           <button
             className="text-white hover:text-gray-300"
@@ -69,12 +69,18 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Profile Section */}
+        {/* Profile */}
         <div className="flex flex-col items-start py-4 px-4">
-          <div className="text-gray-400 text-sm uppercase tracking-wide">Profile</div>
+          <div className="text-gray-400 text-sm uppercase tracking-wide">
+            Profile
+          </div>
           <div className="flex items-center mt-2">
             <img
-              src={authAccount.photo ? `data:image/png;base64,${authAccount.photo}` : defaultProfile}
+              src={
+                authAccount.photo
+                  ? `data:image/png;base64,${authAccount.photo}`
+                  : defaultProfile
+              }
               alt="Profile"
               className="w-10 h-10 rounded-full"
             />
@@ -87,23 +93,39 @@ const Navbar = () => {
 
         {/* Menu */}
         <nav className="flex-1 px-4 py-2 overflow-y-auto">
-          <div className="text-gray-400 text-sm mt-4 uppercase tracking-wide">Menu</div>
+          <div className="text-gray-400 text-sm mt-4 uppercase tracking-wide">
+            Menu
+          </div>
 
           <ul className="space-y-4">
             <li className="hover:bg-green-700 p-2 rounded-md cursor-pointer">
-              <Link to="/" className="flex items-center space-x-3">
+              <Link
+                to="/"
+                className="flex items-center space-x-3"
+                onClick={toggleNavbar}
+              >
                 <img src={dashboard} alt="Dashboard" className="w-5 h-5" />
                 <span className="font-bold">Dashboard</span>
               </Link>
             </li>
+
             <li className="hover:bg-green-700 p-2 rounded-md cursor-pointer">
-              <Link to="/monitoring" className="flex items-center space-x-3">
+              <Link
+                to="/monitoring"
+                className="flex items-center space-x-3"
+                onClick={toggleNavbar}
+              >
                 <img src={monitoring} alt="Monitoring" className="w-5 h-5" />
                 <span className="font-bold">Monitoring</span>
               </Link>
             </li>
+
             <li className="hover:bg-green-700 p-2 rounded-md cursor-pointer">
-              <Link to="/plts" className="flex items-center space-x-3">
+              <Link
+                to="/plts"
+                className="flex items-center space-x-3"
+                onClick={toggleNavbar}
+              >
                 <img src={plts} alt="PLTS" className="w-5 h-5" />
                 <span className="font-bold">PLTS</span>
               </Link>
@@ -111,18 +133,33 @@ const Navbar = () => {
 
             {authAccount.role === "Operator" && (
               <>
-                <li className="text-gray-400 text-sm mt-6 uppercase tracking-wide">Admin Portal</li>
-                <li className="hover:bg-green-700 p-2 rounded-md cursor-pointer" onClick={toggleUserManagement}>
+                <li className="text-gray-400 text-sm mt-6 uppercase tracking-wide">
+                  Admin Portal
+                </li>
+
+                <li
+                  className="hover:bg-green-700 p-2 rounded-md cursor-pointer"
+                  onClick={toggleUserManagement}
+                >
                   <div className="flex items-center space-x-3">
-                    <img src={usermanagement} alt="User Management" className="w-5 h-5" />
+                    <img
+                      src={usermanagement}
+                      alt="User Management"
+                      className="w-5 h-5"
+                    />
                     <span className="font-bold">User Management</span>
                   </div>
                 </li>
+
                 {isUserManagementOpen && (
                   <ul className="ml-8 space-y-2">
-                   <li className="hover:bg-green-700 p-2 rounded-md cursor-pointer">
-                      <Link to="/manualkontrol" className="flex items-center space-x-3">
-                      <span className="font-bold">Manual Kontrol</span>
+                    <li className="hover:bg-green-700 p-2 rounded-md cursor-pointer">
+                      <Link
+                        to="/manualkontrol"
+                        className="flex items-center space-x-3"
+                        onClick={toggleNavbar}
+                      >
+                        <span className="font-bold">Manual Kontrol</span>
                       </Link>
                     </li>
                   </ul>
@@ -132,28 +169,55 @@ const Navbar = () => {
 
             {authAccount.role === "Administrator" && (
               <>
-                <li className="text-gray-400 text-sm mt-6 uppercase tracking-wide">Admin Portal</li>
-                <li className="hover:bg-green-700 p-2 rounded-md cursor-pointer" onClick={toggleUserManagement}>
+                <li className="text-gray-400 text-sm mt-6 uppercase tracking-wide">
+                  Admin Portal
+                </li>
+
+                <li
+                  className="hover:bg-green-700 p-2 rounded-md cursor-pointer"
+                  onClick={toggleUserManagement}
+                >
                   <div className="flex items-center space-x-3">
-                    <img src={usermanagement} alt="User Management" className="w-5 h-5" />
+                    <img
+                      src={usermanagement}
+                      alt="User Management"
+                      className="w-5 h-5"
+                    />
                     <span className="font-bold">User Management</span>
                   </div>
                 </li>
+
                 {isUserManagementOpen && (
                   <ul className="ml-8 space-y-2">
                     <li className="hover:bg-green-700 p-2 rounded-md cursor-pointer">
-                      <Link to="/user&admin" className="flex items-center space-x-3">
-                        <span className="font-bold">User Admin</span>
+                      <Link
+                        to="/user&admin"
+                        className="flex items-center space-x-3"
+                        onClick={toggleNavbar}
+                      >
+                        <span className="font-bold">Users Admin</span>
                       </Link>
                     </li>
+
                     <li className="hover:bg-green-700 p-2 rounded-md cursor-pointer">
-                      <Link to="/sensor&parameter" className="flex items-center space-x-3">
-                        <span className="font-bold">Sensors & Parameters</span>
+                      <Link
+                        to="/sensor&parameter"
+                        className="flex items-center space-x-3"
+                        onClick={toggleNavbar}
+                      >
+                        <span className="font-bold">
+                          Sensors & Parameters
+                        </span>
                       </Link>
                     </li>
+
                     <li className="hover:bg-green-700 p-2 rounded-md cursor-pointer">
-                      <Link to="/manualkontrol" className="flex items-center space-x-3">
-                      <span className="font-bold">Manual Kontrol</span>
+                      <Link
+                        to="/manualkontrol"
+                        className="flex items-center space-x-3"
+                        onClick={toggleNavbar}
+                      >
+                        <span className="font-bold">Manual Kontrol</span>
                       </Link>
                     </li>
                   </ul>
