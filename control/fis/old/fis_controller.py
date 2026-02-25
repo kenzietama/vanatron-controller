@@ -24,8 +24,8 @@ class FISController:
             self.error['Negatif Besar'] = fuzz.trapmf(self.error.universe, [-1, -1, -0.75, -0.5])
             self.error['Negatif Kecil'] = fuzz.trapmf(self.error.universe, [-0.75, -0.5, -0.25, 0])
             self.error['Nol'] = fuzz.trimf(self.error.universe, [-0.25, 0, 0.25])
-            self.error['Positif Kecil'] = fuzz.trimf(self.error.universe, [0, 0.25, 0.5])
-            self.error['Positif Besar'] = fuzz.trapmf(self.error.universe, [0.4, 0.6, 1, 1])
+            self.error['Positif Kecil'] = fuzz.trapmf(self.error.universe, [0, 0.25, 0.5, 0.75])
+            self.error['Positif Besar'] = fuzz.trapmf(self.error.universe, [0.5, 0.75, 1, 1])
             
             # Membership functions for delta error
             self.d_error['Negatif'] = fuzz.trapmf(self.d_error.universe, [-0.5, -0.5, -0.25, 0])
@@ -33,11 +33,11 @@ class FISController:
             self.d_error['Positif'] = fuzz.trapmf(self.d_error.universe, [0, 0.25, 0.5, 0.5])
 
             # Membership functions for aerator speed
-            self.aerator_speed['Lambat'] = fuzz.trapmf(self.aerator_speed.universe, [40, 40, 55, 65])
-            self.aerator_speed['Sedang'] = fuzz.trimf(self.aerator_speed.universe, [55, 65, 75])
-            self.aerator_speed['Cepat'] = fuzz.trimf(self.aerator_speed.universe, [65, 75, 85])
-            self.aerator_speed['Sangat_Cepat'] = fuzz.trimf(self.aerator_speed.universe, [75, 85, 95])
-            self.aerator_speed['Max'] = fuzz.trapmf(self.aerator_speed.universe, [85, 95, 109, 110])
+            self.aerator_speed['Lambat'] = fuzz.trimf(self.aerator_speed.universe, [15, 30, 45])
+            self.aerator_speed['Sedang'] = fuzz.trimf(self.aerator_speed.universe, [35, 50, 65])
+            self.aerator_speed['Cepat'] = fuzz.trimf(self.aerator_speed.universe, [55, 70, 85])
+            self.aerator_speed['Sangat_Cepat'] = fuzz.trimf(self.aerator_speed.universe, [75, 90, 100])
+            self.aerator_speed['Max'] = fuzz.trimf(self.aerator_speed.universe, [90, 100, 100])
             
             # Defuzzification method
             self.aerator_speed.defuzzify_method = 'centroid'
@@ -48,10 +48,10 @@ class FISController:
                 ctrl.Rule(self.error['Negatif Kecil'] & self.d_error['Negatif'], self.aerator_speed['Sedang']),
                 ctrl.Rule(self.error['Nol'] & self.d_error['Negatif'], self.aerator_speed['Cepat']),
                 ctrl.Rule(self.error['Positif Kecil'] & self.d_error['Negatif'], self.aerator_speed['Sangat_Cepat']),
-                ctrl.Rule(self.error['Positif Besar'] & self.d_error['Negatif'], self.aerator_speed['Max']),
+                ctrl.Rule(self.error['Positif Besar'] & self.d_error['Negatif'], self.aerator_speed['Sangat_Cepat']),
                 ctrl.Rule(self.error['Negatif Besar'] & self.d_error['Stabil'], self.aerator_speed['Lambat']),
-                ctrl.Rule(self.error['Negatif Kecil'] & self.d_error['Stabil'], self.aerator_speed['Lambat']),
-                ctrl.Rule(self.error['Nol'] & self.d_error['Stabil'], self.aerator_speed['Sedang']),
+                ctrl.Rule(self.error['Negatif Kecil'] & self.d_error['Stabil'], self.aerator_speed['Sedang']),
+                ctrl.Rule(self.error['Nol'] & self.d_error['Stabil'], self.aerator_speed['Cepat']),
                 ctrl.Rule(self.error['Positif Kecil'] & self.d_error['Stabil'], self.aerator_speed['Sangat_Cepat']),
                 ctrl.Rule(self.error['Positif Besar'] & self.d_error['Stabil'], self.aerator_speed['Max']),
                 ctrl.Rule(self.error['Negatif Besar'] & self.d_error['Positif'], self.aerator_speed['Lambat']),
