@@ -76,10 +76,11 @@ class VanatronService:
         self.EMERGENCY_DO_LOW = 4.0
         self.EMERGENCY_DO_HIGH = 4.5
 
-        # Rule 4: Sensor fault
-        self.null_do_cycles = 0
+        # Rule 4: Sensor fault – fast detection from data acquisition loop
+        self.sensor_fault_active = False
+        self.consecutive_failed_reads = 0
+        self.SENSOR_FAULT_THRESHOLD = 3
         self._sensor_fault_logged = False
-        self.SENSOR_FAULT_CYCLES = 2
 
         # ── Manual heartbeat tracking ──
         self._last_manual_heartbeat = 0.0
@@ -289,13 +290,13 @@ class VanatronService:
         )
         if not self._sensor_fault_logged:
             logger.critical(
-                f"SENSOR FAULT FAILSAFE - {self.null_do_cycles} null cycles, "
+                f"SENSOR FAULT FAILSAFE - {self.consecutive_failed_reads} consecutive failed reads, "
                 f"forcing VFD to {speed:.0f}%"
             )
             self._sensor_fault_logged = True
         else:
             logger.debug(
-                f"Sensor fault ongoing - cycle {self.null_do_cycles}, VFD at {speed:.0f}%"
+                f"Sensor fault ongoing - {self.consecutive_failed_reads} failed reads, VFD at {speed:.0f}%"
             )
 
     # -----------------------------------------------------------------
@@ -308,7 +309,7 @@ class VanatronService:
           1. API loss → maintain last-known mode (handled by api_sync_loop).
           2. DO < 4.0 mg/L → emergency 100%.
           3. Hysteresis: stay 100% until DO >= 4.5 mg/L.
-          4. >2 null DO cycles → assume sensor fault → 100% (yields to manual).
+          4. Sensor fault (detected in data acq loop) → 100% (yields to manual).
         """
         logger.info("Starting Control System Thread...")
 
@@ -334,8 +335,9 @@ class VanatronService:
                 cycle_start = time.time()
 
                 # ── Block until trigger OR timeout ──
-                # Wakes immediately on api_sync_loop change, otherwise every
-                # CONTROL_LOOP_INTERVAL seconds for periodic housekeeping.
+                # Wakes immediately on api_sync_loop change or sensor fault,
+                # otherwise every CONTROL_LOOP_INTERVAL seconds for periodic
+                # housekeeping.
                 self.control_trigger.wait(timeout=config.CONTROL_LOOP_INTERVAL)
                 self.control_trigger.clear()
 
@@ -353,31 +355,24 @@ class VanatronService:
                 # ---- Rules 2 & 3: Emergency DO hysteresis ----
                 self._update_emergency_override(do_reading)
 
-                # ---- Rule 4: Sensor fault counter ----
-                if do_reading is None:
-                    self.null_do_cycles += 1
-                    if self.null_do_cycles <= self.SENSOR_FAULT_CYCLES:
+                # ---- Rule 4: Sensor fault (detected by data acquisition loop) ----
+                if self.sensor_fault_active:
+                    # Reset FIS state so delta_error doesn't spike on reconnect
+                    self.control_state['previous_error'] = None
+                    self.control_state['control_initialized'] = False
+
+                    if mode == 'manual':
+                        clamped = max(config.FIS_MIN_POWER, min(config.FIS_MAX_POWER, manual_speed))
                         logger.warning(
-                            f"No DO reading (cycle {self.null_do_cycles}/{self.SENSOR_FAULT_CYCLES}), "
-                            f"skipping control cycle"
+                            f"Sensor fault active but mode=manual "
+                            f"→ technician override, keeping manual speed {clamped:.1f}%"
                         )
-                        continue
-                    else:
-                        if mode == 'manual':
-                            logger.warning(
-                                f"Sensor fault ({self.null_do_cycles} null cycles) but mode=manual "
-                                f"→ technician override, keeping manual speed {manual_speed:.1f}%"
-                            )
-                            self.vanatron.vfd.setSpeed(
-                                max(config.FIS_MIN_POWER, min(config.FIS_MAX_POWER, manual_speed))
-                            )
-                            continue
-                        else:
-                            if state == 'on':
-                                self._apply_sensor_fault_speed(do_setpoint)
-                            continue
+                        self.vanatron.vfd.setSpeed(clamped)
+                    elif state == 'on':
+                        self._apply_sensor_fault_speed(do_setpoint)
+                    continue
                 else:
-                    self.null_do_cycles = 0
+                    # Sensor is healthy – clear the one-shot log flag
                     self._sensor_fault_logged = False
 
                 # ---- Detect state/mode changes ----
@@ -621,7 +616,7 @@ class VanatronService:
             logger.error(f"Error handling OFF state: {e}")
 
     # -----------------------------------------------------------------
-    #  DATA READERS (unchanged)
+    #  DATA READERS
     # -----------------------------------------------------------------
     def _read_vanatron_node(self):
         """Read and upload Vanatron Node sensors"""
@@ -685,7 +680,13 @@ class VanatronService:
             logger.error("Failed to read VFD after 3 attempts")
 
     def _read_generic_sensors(self):
-        """Read and upload generic sensors"""
+        """Read and upload generic sensors.
+
+        Sensor fault detection lives here (fast data-acquisition cadence)
+        rather than in the slow control loop. On fault threshold breach or
+        recovery, the control_trigger is fired to instantly wake the
+        control loop.
+        """
         for attempt in range(3):
             try:
                 raw_suhu = self.vanatron.do_sensor.read('suhu')
@@ -702,14 +703,40 @@ class VanatronService:
                     self._initial_do_ready.set()
                     self.api.upload_dissolved_oxygen(do)
                     logger.debug(f"Dissolved Oxygen: {do} mg/L")
+
+                    # ── Successful read: reset fault counter ──
+                    self.consecutive_failed_reads = 0
+                    if self.sensor_fault_active:
+                        self.sensor_fault_active = False
+                        logger.info(
+                            "DO sensor reconnected – sensor fault cleared, "
+                            "waking control loop for normal operation"
+                        )
+                        self.control_trigger.set()
                     break
             except Exception as e:
                 logger.warning(f"Error reading generic sensors (attempt {attempt + 1}): {e}")
                 time.sleep(1 + attempt)
         else:
+            # All 3 attempts failed
             with self.do_reading_lock:
                 self.latest_do_reading = None
-            logger.warning("DO sensor read failed after 3 attempts - reading cleared")
+
+            self.consecutive_failed_reads += 1
+            logger.warning(
+                f"DO sensor read failed after 3 attempts – "
+                f"consecutive failures: {self.consecutive_failed_reads}/{self.SENSOR_FAULT_THRESHOLD}"
+            )
+
+            if (self.consecutive_failed_reads >= self.SENSOR_FAULT_THRESHOLD
+                    and not self.sensor_fault_active):
+                self.sensor_fault_active = True
+                logger.critical(
+                    f"SENSOR FAULT DETECTED – {self.consecutive_failed_reads} consecutive "
+                    f"failed read cycles (threshold: {self.SENSOR_FAULT_THRESHOLD}) "
+                    f"-> waking control loop for failsafe action"
+                )
+                self.control_trigger.set()
 
     def _read_weather(self):
         """Read and upload Weather Station data"""
