@@ -25,11 +25,10 @@ DO_SLAVE_ID = 55
 ## Data Acquisition Settings
 DATA_ACQUISITION_INTERVAL = 3  # seconds
 WEATHER_UPDATE_INTERVAL = 3  # 5 minutes
-# WEATHER_UPDATE_INTERVAL = 300  # 5 minutes
 
 ## Control System Settings
-CONTROL_LOOP_INTERVAL = 3  # seconds
-CONTROL_LOOP_AUTO_INTERVAL = 10  # seconds
+CONTROL_LOOP_INTERVAL = 29  # seconds – unified interval for both auto and manual
+API_POLL_INTERVAL = 10  # seconds – how often the API sync thread polls the backend
 FIS_MIN_POWER = 30  # minimum power percentage
 FIS_MAX_POWER = 100  # maximum power percentage
 HYBRID = False
