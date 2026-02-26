@@ -43,6 +43,7 @@ class VanatronService:
         # Thread-safe data sharing
         self.do_reading_lock = threading.Lock()
         self.latest_do_reading = None
+        self._initial_do_ready = threading.Event()  # Event to signal first valid DO reading
         
         # Control state tracking
         self.control_state = {
@@ -210,6 +211,17 @@ class VanatronService:
         
         # Initialize from last database record if exists
         self._initialize_control_state()
+
+        # ── Wait for the first valid DO reading from the data_acquisition thread ──
+        logger.info("Waiting for initial DO reading to start control loop...")
+        while self.running and not self._initial_do_ready.wait(timeout=1.0):
+            pass
+
+        if not self.running:
+            logger.info("Service stopped before initial DO reading was available. Exiting control loop.")
+            return
+        
+        logger.info("Initial DO reading acquired. Starting control loop with safety rules.")
         
         while self.running:
             try:
@@ -629,6 +641,7 @@ class VanatronService:
                     do = round(raw_do / 10.0, 2)  # Assuming sensor gives value in tenths of mg/L
                     with self.do_reading_lock:
                         self.latest_do_reading = do  # Calibration offset
+                    self._initial_do_ready.set()  # Signal that we have a valid DO reading
                     self.api.upload_dissolved_oxygen(do)
                     logger.debug(f"Dissolved Oxygen: {do} mg/L")
                     break

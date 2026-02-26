@@ -87,7 +87,7 @@ class FISController:
             # Get raw output
             speed = float(self.sim.output['aerator_speed'])
             
-            print(f"FIS Output before adjustment: {speed:.2f}%")
+            # print(f"FIS Output before adjustment: {speed:.2f}%")
 
             # Apply snap-to-boundary and rounding logic
             if speed >= self.max_power - 2.0:
