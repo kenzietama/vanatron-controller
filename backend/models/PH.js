@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema
 
 const PHSchema = new Schema({
-    pH: {
+    ph: {
         type: Number,
         required: true,
     },

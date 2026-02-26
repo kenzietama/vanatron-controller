@@ -27,8 +27,7 @@ const getPHgraph = async (req, res) => {
 const addPH = async (req, res) => {
     const requestBody = req.body
     const { deviceId } = req.params
-
-    const response = await displayItem.find({sensor: 'pH', device: deviceId}).limit(1)
+    const response = await displayItem.find({sensor: 'phs', device: deviceId}).limit(1)
 
     try {
         requestBody.deviceId = deviceId
@@ -44,8 +43,8 @@ const addPH = async (req, res) => {
         const PH = await ph.create(requestBody)  // ubah ws -> ph
 
         if(response) {
-            io.emit(`pH${deviceId}`, PH)
-            emitThresholdAlerts('pH', deviceId, requestBody)
+            io.emit(`phs${deviceId}`, PH)
+            emitThresholdAlerts('phs', deviceId, requestBody)
         }
 
         res.status(200).json(PH)   // ubah WS -> PH
