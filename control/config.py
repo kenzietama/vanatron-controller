@@ -27,11 +27,10 @@ DATA_ACQUISITION_INTERVAL = 3  # seconds
 WEATHER_UPDATE_INTERVAL = 3  # 5 minutes
 
 ## Control System Settings
-CONTROL_LOOP_INTERVAL = 29  # seconds – unified interval for both auto and manual
+CONTROL_LOOP_INTERVAL = 300  # seconds – unified interval for both auto and manual
 API_POLL_INTERVAL = 10  # seconds – how often the API sync thread polls the backend
-FIS_MIN_POWER = 30  # minimum power percentage
+FIS_MIN_POWER = 50  # minimum power percentage
 FIS_MAX_POWER = 100  # maximum power percentage
-HYBRID = False
 
 ## Database
 # DATABASE_PATH = '/opt/vanatron/control_history.db'
