@@ -1,10 +1,8 @@
 import minimalmodbus
-import serial
 import serial.tools.list_ports
 import time
 import threading
 import logging
-import os
 from typing import List, Union
 
 logger = logging.getLogger(__name__)
@@ -21,12 +19,6 @@ class ModbusController:
         self.instrument = None
         self.isConnected = False
 
-    def _get_actual_port(self) -> str:
-        """Dynamically resolves symlinks (like /dev/ttyRS485) to their current real port (like /dev/ttyUSB1)"""
-        if os.path.exists(self.port):
-            return os.path.realpath(self.port)
-        return self.port
-
     def _port_exist(self, port_name: str) -> bool:
         if not port_name:
             return False
@@ -35,15 +27,14 @@ class ModbusController:
 
     def connect(self) -> bool:
         for attempt in range(5):
-            actual_port = self._get_actual_port()
-            if self._port_exist(actual_port):    
+            if self._port_exist(self.port):    
                 try:
-                    self.instrument = minimalmodbus.Instrument(actual_port, self.defaultSlaveID)
+                    self.instrument = minimalmodbus.Instrument(self.port, self.defaultSlaveID)
                     self.instrument.serial.baudrate = self.baudrate
                     self.instrument.serial.timeout = self.timeout
                     self.instrument.mode = minimalmodbus.MODE_RTU
                     self.isConnected = True
-                    logger.info(f"Connected to hardware {actual_port} on attempt {attempt+1}")
+                    logger.info(f"Connected to {self.port} on attempt {attempt+1}")
                     time.sleep(1)
                     return True
                 except Exception as e:
@@ -56,13 +47,13 @@ class ModbusController:
 
     def disconnect(self):
         if self.instrument and hasattr(self.instrument, 'serial'):
-            try:
-                self.instrument.serial.close()
-            except Exception:
-                pass
+                try:
+                    self.instrument.serial.close()
+                except Exception:
+                    pass
         self.isConnected = False
         self.instrument = None
-        logger.info("Modbus connection closed.")
+        print("Modbus connection closed.")
 
     def _prepareForCommunication(self, slaveID: int | None) -> int | None:
         self._ensureConnection()
@@ -74,34 +65,21 @@ class ModbusController:
         return targetSlaveID
 
     def _ensureConnection(self):
-        actual_port = self._get_actual_port()
-        
-        if self._port_exist(actual_port):
+        if self._port_exist(self.port):
             if self.isConnected:
                 try:
-                    if not self.instrument or not self.instrument.serial.is_open:
-                        raise serial.SerialException("Port closed internally")
-                    
-                    # --- THE HOT-PLUG FIX IS HERE ---
-                    # If the symlink now points to a NEW port (e.g. USB1), but 
-                    # we are still bound to the old one (e.g. USB0), force a reconnect!
-                    if self.instrument.serial.port != actual_port:
-                        raise serial.SerialException(f"Hardware port shifted from {self.instrument.serial.port} to {actual_port}")
-                        
+                    if not self.instrument.serial.is_open:
+                        raise serial.SerialException("Port closed")
                     return True
                 except (serial.SerialException, IOError, OSError) as e:
                     logger.warning(f"Invalid port state: {e} - forcing reconnect...")
                     self.disconnect()
-                    return self.connect()
             else:
                 logger.info("Connecting to port...")
                 return self.connect()
         else:
-            if self.isConnected:
-                logger.error("Hardware physically disconnected. Tearing down ghost connection.")
-                self.disconnect()
+            logger.error(f"Port {self.port} does not exist - waiting for detection...")
             return False
-
     # FC01
     def readCoil(self, coilAddress: int, slaveID: int | None = None) -> bool | None:
         with self._lock:
@@ -256,16 +234,10 @@ class ModbusController:
 
     def _handleError(self, error: Exception, function_name: str, slaveID: int, address: int):
         if isinstance(error, minimalmodbus.NoResponseError):
-            # Verify if the hardware actually vanished during a timeout
-            actual_port = self._get_actual_port()
-            if (self.instrument and self.instrument.serial.port != actual_port) or not os.path.exists(actual_port):
-                logger.error(f"Hardware disconnection detected during NoResponse timeout. Forcing reconnect...")
-                self.isConnected = False
-                self.disconnect()
-            else:
-                # A slave not answering does NOT mean the serial bus is broken.
-                # Other slaves (e.g. VFD) may still be reachable on the same port.
-                logger.debug(f"No response from slave {slaveID} addr {address} in {function_name}")
+            # A slave not answering does NOT mean the serial bus is broken.
+            # Other slaves (e.g. VFD) may still be reachable on the same port.
+            # Do NOT disconnect the shared serial port here.
+            logger.debug(f"No response from slave {slaveID} addr {address} in {function_name}")
         elif isinstance(error, minimalmodbus.InvalidResponseError):
             # Garbled frame - flush buffers but keep connection alive.
             logger.warning(f"Invalid response from slave {slaveID} addr {address} in {function_name}: {error}")

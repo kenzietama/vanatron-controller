@@ -2,6 +2,7 @@
 import logging
 import sys
 import config
+import os
 
 logging.basicConfig(
     level=getattr(logging, config.LOG_LEVEL.upper(), logging.INFO),
@@ -25,7 +26,7 @@ logger = logging.getLogger(__name__)
 class VanatronService:
     def __init__(self):
         logger.info("Initializing Unified Vanatron Service...")
-
+         
         # Shared Vanatron Center instance
         self.vanatron = VanatronCenter(port=config.SERIAL_PORT)
 
@@ -48,10 +49,10 @@ class VanatronService:
 
         # ── Thread-safe data sharing: API state ──
         self.api_state_lock = threading.Lock()
-        self.last_api_state = 'off'
+        self.last_api_state = 'on'
         self.last_api_mode = 'manual'
-        self.last_api_do_setpoint = 5.0
-        self.last_api_manual_speed = 50.0
+        self.last_api_do_setpoint = 4.5
+        self.last_api_manual_speed = 100.0
         self._api_offline_logged = False
 
         # ── Interrupt trigger: wakes the control loop immediately ──

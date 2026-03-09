@@ -5,19 +5,20 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=vanatron
-Group=vanatron
-WorkingDirectory=/opt/vanatron
-ExecStart=/usr/bin/python3 /opt/vanatron/unified_service.py
+User=admin
+#Group=admin
+WorkingDirectory=/home/admin/vanatron-controller/control
+ExecStart=/home/admin/vanatron-controller/control/venv/bin/python3 /home/admin/vanatron-controller/control/unified_service.py
 Restart=always
 RestartSec=10
 StandardOutput=journal
 StandardError=journal
+SupplementaryGroups=dialout tty
 
 # Environment variables
-Environment="API_BASE_URL=http://localhost:5000/api"
-Environment="SERIAL_PORT=/dev/ttyUSB0"
-Environment="LOG_LEVEL=INFO"
+#Environment="API_BASE_URL=http://localhost:5000/api"
+#Environment="SERIAL_PORT=/dev/ttyUSB0"
+#Environment="LOG_LEVEL=INFO"
 
 # Security hardening
 NoNewPrivileges=true

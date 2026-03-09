@@ -7,7 +7,7 @@ API_BASE_URL = os.getenv('API_BASE_URL', 'http://localhost:5000/api')
 DEVICE_ID = 'A'
 
 ## Serial Port Configuration
-SERIAL_PORT = os.getenv('SERIAL_PORT', 'COM11')
+SERIAL_PORT = os.getenv('SERIAL_PORT', '/dev/ttyRS485')
 
 ## Weather Station Configuration
 WEATHER_API_KEY = '2385e72b9106446885e72b9106546878'
@@ -22,6 +22,9 @@ DO_SLAVE_ID = 55
 # SALINITY_SLAVE_ID = 14
 # PH_SENSOR_SLAVE_ID = 15
 
+VANATRON_NODE1_SLAVE_ID = 1
+VANATRON_NODE2_SLAVE_ID = 2
+
 ## Data Acquisition Settings
 DATA_ACQUISITION_INTERVAL = 3  # seconds
 WEATHER_UPDATE_INTERVAL = 3  # 5 minutes
@@ -34,9 +37,9 @@ FIS_MAX_POWER = 100  # maximum power percentage
 
 ## Database
 # DATABASE_PATH = '/opt/vanatron/control_history.db'
-DATABASE_PATH = 'K:/Capstone/ControlSystem/vanatron-controller/control/control_history.db'
+DATABASE_PATH = 'control_history.db'
 
 ## Logging
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
 # LOG_FILE = '/var/log/vanatron/system.log'
-LOG_FILE = 'K:/Capstone/ControlSystem/vanatron-controller/control/system.log'
+LOG_FILE = 'system.log'

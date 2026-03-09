@@ -9,8 +9,8 @@ from controller.weatherStationController import WeatherStationController
 
 class VanatronCenter:
     def __init__(self, port: str):
-        if not self._port_exist(port):
-            raise Exception(f"Serial port '{port}' does not exist.")
+        #if not self._port_exist(port):
+            #raise Exception(f"Serial port '{port}' does not exist.")
         self.modbus = ModbusController(port=port, defaultSlaveID=1, timeout=2)
         self.wsController = WeatherStationController()
 

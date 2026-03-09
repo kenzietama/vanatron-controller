@@ -36,15 +36,18 @@ class VFD:
             time.sleep(0.5)
             self.reset()
             time.sleep(0.5)
-            if( lastSpeed is not None and lastSpeed > 0 ):
-                logger.info(f"Setting {self.name} (ID: {self.slaveID}) speed to {lastSpeed}%...")
-                self.modbus.writeSingleRegister(
-                    registerAddress=self._REG_FREQ_SETPOINT, value=lastSpeed*2/100, slaveID=self.slaveID
-                )
-                time.sleep(0.5)
-                self.runForward()
-                time.sleep(0.5)
-                self.updateBuffer()
+            #if( lastSpeed is not None and lastSpeed > 0 ):
+            #    logger.info(f"Setting {self.name} (ID: {self.slaveID}) speed to {lastSpeed}%...")
+            #    self.modbus.writeSingleRegister(
+            #        registerAddress=self._REG_FREQ_SETPOINT, value=lastSpeed, slaveID=self.slaveID
+            #    )
+            #    time.sleep(0.5)
+            #    self.runForward()
+            #    time.sleep(0.5)
+            #    self.updateBuffer()
+            self.runForward()
+            time.sleep(0.1)
+            self.setSpeed(100)
         elif current_speed is not None and current_speed == 0:
             self.runForward()
             time.sleep(0.5)
