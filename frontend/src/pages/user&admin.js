@@ -79,21 +79,15 @@ const UserAdmin = () => {
           <div className="flex-1 p-4 sm:p-6">
             <div className="p-4 mb-6 bg-white border border-gray-300 rounded-lg shadow-lg sm:p-6">
               {/* Search + Add Data */}
-              <div className="flex flex-col items-center justify-between gap-4 mb-6 sm:flex-row">
-                <div className="relative w-full sm:flex-1 sm:max-w-3xl">
+              <div className="flex flex-col gap-4 mb-6 sm:flex-row">
+                <div className="relative flex-1">
                   <input
-                    type="text"
-                    placeholder="Search"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full h-10 pl-4 pr-12 text-sm border border-gray-300 rounded-lg sm:text-base"
+                    placeholder="Search"
+                    className="w-full h-10 pl-4 pr-10 border rounded-lg"
                   />
-                  <button
-                    onClick={() => console.log("Search:", searchTerm)}
-                    className="absolute p-2 text-black transform -translate-y-1/2 rounded-md right-2 top-1/2"
-                  >
-                    <Search className="w-5 h-5" />
-                  </button>
+                  <Search className="absolute w-5 h-5 -translate-y-1/2 right-3 top-1/2" />
                 </div>
 
                 <button

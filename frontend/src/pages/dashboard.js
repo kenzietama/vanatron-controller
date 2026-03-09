@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Header from "../component/header";
-import galeri1 from "../gambar/galeri1.jpg";
+import kolam from "../gambar/kolam.jpeg";
+import laboratorium from "../gambar/laboratorium.jpeg";
 import vaname from "../gambar/vaname.jpg";
 import rangkaian from "../gambar/rangkaian.png";
 import diagram from "../gambar/diagram.png";
@@ -15,22 +16,22 @@ const Dashboard = () => {
       <Header pageName="Dashboard" />
 
       {/* Hero Section */}
-      <section className="text-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-cyan-100 to-blue-200 shadow-md">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-800 drop-shadow-lg leading-tight">
+      <section className="px-4 py-12 text-center shadow-md sm:px-6 lg:px-8 bg-gradient-to-r from-cyan-100 to-blue-200">
+        <h1 className="text-3xl font-extrabold leading-tight text-gray-800 sm:text-4xl md:text-5xl drop-shadow-lg">
           Selamat Datang di Smart Tambak Udang Vaname
         </h1>
-        <p className="text-lg sm:text-xl font-medium text-gray-600 mt-3">
+        <p className="mt-3 text-lg font-medium text-gray-600 sm:text-xl">
           Pemantauan cerdas dengan energi terbarukan – Pemalang
         </p>
       </section>
 
       {/* Rangkaian Alat */}
-      <section className="px-4 sm:px-8 py-10 text-center">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">
+      <section className="px-4 py-10 text-center sm:px-8">
+        <h2 className="mb-6 text-2xl font-bold text-gray-800 sm:text-3xl">
           Rangkaian Sistem
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-5xl mx-auto">
+        <div className="grid max-w-5xl grid-cols-1 gap-6 mx-auto sm:grid-cols-2">
           <div
             className="cursor-pointer"
             onClick={() => setPreviewImage(diagram)}
@@ -38,7 +39,7 @@ const Dashboard = () => {
             <img
               src={diagram}
               alt="Diagram Sistem"
-              className="rounded-xl shadow-md w-full h-56 object-contain bg-white p-3 hover:scale-105 transition"
+              className="object-contain w-full h-56 p-3 transition bg-white shadow-md rounded-xl hover:scale-105"
             />
             <p className="mt-2 text-sm text-gray-600">Diagram Sistem</p>
           </div>
@@ -50,7 +51,7 @@ const Dashboard = () => {
             <img
               src={rangkaian}
               alt="Rangkaian Sistem"
-              className="rounded-xl shadow-md w-full h-56 object-contain bg-white p-3 hover:scale-105 transition"
+              className="object-contain w-full h-56 p-3 transition bg-white shadow-md rounded-xl hover:scale-105"
             />
             <p className="mt-2 text-sm text-gray-600">Rangkaian Alat</p>
           </div>
@@ -60,10 +61,10 @@ const Dashboard = () => {
       {/* Modal Preview Gambar */}
       {previewImage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
-          <div className="relative max-w-6xl w-full px-4">
+          <div className="relative w-full max-w-6xl px-4">
             <button
               onClick={() => setPreviewImage(null)}
-              className="absolute -top-10 right-4 text-white text-3xl font-bold hover:text-gray-300"
+              className="absolute text-3xl font-bold text-white -top-10 right-4 hover:text-gray-300"
             >
               ✕
             </button>
@@ -77,12 +78,12 @@ const Dashboard = () => {
       )}
 
       {/* Latar Belakang + Video */}
-      <section className="px-4 sm:px-8 py-12 bg-white flex flex-col md:flex-row items-center gap-8">
-        <div className="md:w-1/2 text-left">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">
+      <section className="flex flex-col items-center gap-8 px-4 py-12 bg-white sm:px-8 md:flex-row">
+        <div className="text-left md:w-1/2">
+          <h2 className="mb-4 text-2xl font-bold text-gray-800 sm:text-3xl">
             Latar Belakang
           </h2>
-          <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
+          <p className="text-base leading-relaxed text-gray-600 sm:text-lg">
             Tambak udang vaname membutuhkan sistem pemantauan yang efisien agar
             kualitas air tetap terjaga dan hasil panen optimal. Dengan
             menggabungkan teknologi IoT dan energi terbarukan, sistem ini
@@ -91,25 +92,26 @@ const Dashboard = () => {
           </p>
         </div>
 
-        <div className="md:w-1/2 w-full h-60 sm:h-72 md:h-80 lg:h-96">
+        <div className="w-full md:w-1/2 h-60 sm:h-72 md:h-80 lg:h-96">
           <iframe
-            className="w-full h-full rounded-2xl shadow-lg"
+            className="w-full h-full shadow-lg rounded-2xl"
             src="https://www.youtube.com/embed/5Da5scyju8Y"
             title="Video Penjelasan"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin"
           ></iframe>
         </div>
       </section>
 
       {/* Tentang Udang Vaname */}
-      <section className="px-4 sm:px-8 py-12 bg-gradient-to-r from-gray-100 to-gray-200 flex flex-col md:flex-row items-center gap-8">
-        <div className="md:w-1/2 text-left">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">
+      <section className="flex flex-col items-center gap-8 px-4 py-12 sm:px-8 bg-gradient-to-r from-gray-100 to-gray-200 md:flex-row">
+        <div className="text-left md:w-1/2">
+          <h2 className="mb-4 text-2xl font-bold text-gray-800 sm:text-3xl">
             Mengenal Udang Vaname
           </h2>
-          <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
+          <p className="text-base leading-relaxed text-gray-600 sm:text-lg">
             Udang Vaname (Litopenaeus vannamei) adalah salah satu komoditas
             unggulan budidaya perikanan. Pertumbuhannya cepat, tahan penyakit,
             dan memiliki permintaan pasar yang tinggi baik dalam negeri maupun
@@ -117,32 +119,33 @@ const Dashboard = () => {
           </p>
         </div>
 
-        <div className="md:w-1/2 w-full">
+        <div className="w-full md:w-1/2">
           <img
             src={vaname}
             alt="Udang Vaname"
-            className="rounded-2xl shadow-lg w-full h-64 sm:h-80 md:h-full object-cover"
+            className="object-cover w-full h-64 shadow-lg rounded-2xl sm:h-80 md:h-full"
           />
         </div>
       </section>
 
       {/* Galeri Sistem */}
-      <section className="px-4 sm:px-8 py-10">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center mb-8">
+      <section className="px-4 py-10 sm:px-8">
+        <h2 className="mb-8 text-2xl font-bold text-center text-gray-800 sm:text-3xl">
           Galeri Sistem
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {[{ src: hardware, label: "3D Design Hardware" }, { src: galeri1, label: "Turbin Air" }, { src: galeri1, label: "Kontrol IoT" }].map((item, i) => (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+          {[{ src: hardware, label: "3D Design Hardware" }, { src: kolam, label: "Kolam Tambak" }, { src: laboratorium, label: "Green Vaname Laboratory" }].map((item, i) => (
             <div
               key={i}
-              className="bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition-transform"
+              onClick={() => setPreviewImage(item.src)}
+              className="overflow-hidden transition-transform bg-white shadow-lg cursor-pointer rounded-2xl hover:scale-105"
             >
               <img
                 src={item.src}
                 alt={item.label}
-                className="w-full h-48 sm:h-56 object-cover"
+                className="object-cover w-full h-48 sm:h-56"
               />
-              <p className="text-center font-semibold text-gray-700 py-3">
+              <p className="py-3 font-semibold text-center text-gray-700">
                 {item.label}
               </p>
             </div>
@@ -151,7 +154,7 @@ const Dashboard = () => {
       </section>
 
       {/* Footer */}
-      <footer className="text-center py-6 text-gray-600 text-sm px-4">
+      <footer className="px-4 py-6 text-sm text-center text-gray-600">
         © 2025 Sistem Monitoring Tambak Udang – Energi Terbarukan
       </footer>
     </div>

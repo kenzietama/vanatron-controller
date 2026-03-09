@@ -1,161 +1,167 @@
-import { create } from 'zustand';
-import { axiosInstance } from '../lib/axios.js';
+import { create } from "zustand";
+import { axiosInstance } from "../lib/axios.js";
 import { useAuthStore } from "./useAuthStore.js";
 
 export const usePLTSStore = create((set, get) => ({
-    VFD: [],              
-    latestVFD: null,
-    InverterSolis: [],     
-    latestInverterSolis: null, 
-    InverterSRNE: [],     
-    latestInverterSRNE: null, 
 
-    // Fungsi untuk mengambil data VFD (10 data terakhir)
-    getVFD: async () => {
-        try {
-            const res = await axiosInstance.get('/vfd/graph');
-            if (Array.isArray(res.data)) {
-                const array = res.data.map(VFD => VFD.output_power);
-                set({ VFD: array });
-            } else {
-                console.error("Expected an array but got:", res.data);
-            }
-        } catch (error) {
-            console.log("Error in getVFD:", error.message);
-        }
-    },
+  /* =========================
+     STATE
+  ========================= */
 
-    // Fungsi untuk mengambil data terbaru VFD
-    getLatestVFD: async () => {
-        try {
-            const res = await axiosInstance.get('/vfd/');
-            set({latestVFD: {
-                    output_power: res.data[0].output_power
-                }})
-        } catch (error) {
-            console.log("Error in getLatestVFD:", error.message);
-        }
-    },
+  graphVFD: [],
+  graphInverterSRNE: [],
 
-    // Fungsi untuk mengambil data InverterSolis (10 data terakhir)
-    getInverterSolis: async () => {
-        try {
-            const res = await axiosInstance.get('/InverterSolis/graph');
-            if (Array.isArray(res.data)) {
-                const array = res.data.map(InverterSolis => InverterSolis.this_month_energy);
-                set({ InverterSolis: array });
-            } else {
-                console.error("Expected an array but got:", res.data);
-            }
-        } catch (error) {
-            console.log("Error in getInverterSolis:", error.message);
-        }
-    },
-    
-    // Fungsi untuk mengambil data terbaru InverterSolis
-    getLatestInverterSolis: async () => {
-        try {
-            const res = await axiosInstance.get('/InverterSolis/');
-            set({latestInverterSolis: {
-                this_month_energy: res.data[0].this_month_energy
-                }})
-        } catch (error) {
-            console.log("Error in getLatestInverterSolis:", error.message);
-        }
-    },
+  latestVFD: null,
+  latestInverterSRNE: null,
 
-    // Fungsi untuk mengambil data InverterSRNE (10 data terakhir)
-    getInverterSRNE: async () => {
-        try {
-            const res = await axiosInstance.get('/InverterSRNE/graph');
-            if (Array.isArray(res.data)) {
-                const array = res.data.map(inverter => ({
-                    pv_power: inverter.pv_power,
-                    battery_level: inverter.battery_level
-                }));
-                set({ InverterSRNE: array });
-            } else {
-                console.error("Expected an array but got:", res.data);
-            }
-        } catch (error) {
-            console.log("Error in getInverterSRNE:", error.message);
-        }
-    },
+  isValueLoading: false,
+  isGraphLoading: true,
+  isGraphRefreshing: false,
 
-    // Fungsi untuk mengambil data terbaru InverterSRNE
-    getLatestInverterSRNE: async () => {
-        try {
-            const res = await axiosInstance.get('/InverterSRNE/');
-            if (Array.isArray(res.data) && res.data.length > 0) {
-                set({
-                    latestInverterSRNE: {
-                        pv_power: res.data[0].pv_power,
-                        battery_level: res.data[0].battery_level,
-                    }
-                });
-            } else {
-                console.error("No data found for InverterSRNE.");
-            }
-        } catch (error) {
-            console.log("Error in getLatestInverterSRNE:", error.message);
-        }
-    },
 
-    // Fungsi untuk mendengarkan pembaruan data via WebSocket
-    subscribeSocket: () => {
-        const socket = useAuthStore.getState().socket;
+  /* =========================
+     GET LATEST DATA
+  ========================= */
 
-        // Hindari duplikasi listener
-        socket.off("newDataVFD");
-        socket.off("newDataInverterSolis");
-        socket.off("newDataInverterSRNE");
+  getLatestData: async () => {
 
-        // Pembaruan data untuk VFD
-        socket.on("newDataVFD", (newData) => {
-            if (newData?.output_power) {
-                set((state) => {
-                    const updatedVFD = [...state.VFD];
-                    updatedVFD.unshift(newData.output_power);
-                    if (updatedVFD.length > 10) updatedVFD.pop();
-                    return { latestVFD: newData.output_power, VFD: updatedVFD };
-                });
-                console.log("Updated VFD Data:", newData.output_power);
-            }
-        });
+    set({ isValueLoading: true });
 
-        // Pembaruan data untuk Inverter Solis
-        socket.on("newDataInverterSolis", (newData) => {
-            if (newData?.this_month_energy) {
-                set((state) => {
-                    const updatedInverterSolis = [...state.InverterSolis];
-                    updatedInverterSolis.unshift(newData.this_month_energy);
-                    if (updatedInverterSolis.length > 10) updatedInverterSolis.pop();
-                    return { latestInverterSolis: newData.this_month_energy, InverterSolis: updatedInverterSolis };
-                });
-                console.log("Updated Inverter Solis Data:", newData.this_month_energy);
-            }
-        });
+    try {
 
-        // Pembaruan data untuk InverterSRNE
-        socket.on("newDataInverterSRNE", (newData) => {
-            if (newData?.pv_power || newData?.battery_level) {
-                set((state) => {
-                    const updatedInverterSRNE = [...state.InverterSRNE];
-                    updatedInverterSRNE.unshift({
-                        pv_power: newData.pv_power,
-                        battery_level: newData.battery_level
-                    });
-                    if (updatedInverterSRNE.length > 10) updatedInverterSRNE.pop();
-                    return {
-                        latestInverterSRNE: {
-                            pv_power: newData.pv_power,
-                            battery_level: newData.battery_level
-                        },
-                        InverterSRNE: updatedInverterSRNE
-                    };
-                });
-                console.log("Updated InverterSRNE Data:", newData);
-            }
-        });
-    },
+      const vfd = await axiosInstance.get("/vfd/");
+      const inverter = await axiosInstance.get("/InverterSRNE/");
+
+      set({
+
+        latestVFD: vfd.data?.[0] || null,
+
+        latestInverterSRNE: inverter.data?.[0] || null
+
+      });
+
+    } catch (error) {
+
+      console.log("Error fetching latest PLTS data:", error.message);
+
+    } finally {
+
+      set({ isValueLoading: false });
+
+    }
+
+  },
+
+
+  /* =========================
+     GET GRAPH (10 DATA TERAKHIR)
+  ========================= */
+
+  getGraph: async () => {
+
+    if (get().graphVFD.length === 0) {
+      set({ isGraphLoading: true });
+    } else {
+      set({ isGraphRefreshing: true });
+    }
+
+    try {
+
+      const vfd = await axiosInstance.get("/vfd/graph");
+      const inverter = await axiosInstance.get("/InverterSRNE/graph");
+
+      set({
+
+        graphVFD: vfd.data.slice(0, 10),
+
+        graphInverterSRNE: inverter.data.slice(0, 10)
+
+      });
+
+    } catch (error) {
+
+      console.log("Error fetching graph:", error.message);
+
+    } finally {
+
+      set({ isGraphLoading: false });
+
+      set({ isGraphRefreshing: false });
+
+    }
+
+  },
+
+
+  /* =========================
+     SUBSCRIBE WEBSOCKET
+  ========================= */
+
+  subscribe: async () => {
+
+    const socket = useAuthStore.getState().socket;
+
+    if (!socket) return;
+
+    socket.off("vfdsA");
+    socket.off("invertersrnesA");
+
+
+    /* ======================
+       UPDATE VFD
+    ====================== */
+
+    socket.on("vfdsA", (newData) => {
+
+      if (!newData?.output_power) return;
+
+      set((state) => {
+
+        const updatedGraph = [...state.graphVFD];
+
+        updatedGraph.unshift(newData);
+
+        if (updatedGraph.length > 10) updatedGraph.pop();
+
+        return {
+
+          latestVFD: newData,
+
+          graphVFD: updatedGraph
+
+        };
+
+      });
+
+    });
+
+
+    /* ======================
+       UPDATE INVERTER
+    ====================== */
+
+    socket.on("invertersrnesA", (newData) => {
+
+      set((state) => {
+
+        const updatedGraph = [...state.graphInverterSRNE];
+
+        updatedGraph.unshift(newData);
+
+        if (updatedGraph.length > 10) updatedGraph.pop();
+
+        return {
+
+          latestInverterSRNE: newData,
+
+          graphInverterSRNE: updatedGraph
+
+        };
+
+      });
+
+    });
+
+  }
+
 }));
