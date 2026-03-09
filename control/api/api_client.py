@@ -22,9 +22,9 @@ _MAX_RETRIES     = 2      # retries per call when online
 
 
 class APIClient:
-    def __init__(self):
+    def __init__(self, device_id: str = DEVICE_ID):
         self.base_url = API_BASE_URL
-        self.device_id = DEVICE_ID
+        self.device_id = device_id
         self.session = requests.Session()
         self.session.headers.update({'Content-Type': 'application/json'})
 

@@ -17,15 +17,15 @@ class VanatronNode:
             print(f"Error: Temperature channel {channel} is invalid.")
             return None
         
-        rawValue = self.modbus.readHoldingRegister(registerAddress=address, slaveID=self.slaveID)
+        rawValue = self.modbus.readInputRegister(registerAddress=address, slaveID=self.slaveID)
         return rawValue / 10.0 if rawValue is not None else None
 
     def getPHValue(self) -> float | None:
-        rawValue = self.modbus.readHoldingRegister(registerAddress=2, slaveID=self.slaveID)
+        rawValue = self.modbus.readInputRegister(registerAddress=2, slaveID=self.slaveID)
         return rawValue / 10.0 if rawValue is not None else None
 
     def getDissolvedOxygenValue(self) -> float | None:
-        rawValue = self.modbus.readHoldingRegister(registerAddress=3, slaveID=self.slaveID)
+        rawValue = self.modbus.readInputRegister(registerAddress=3, slaveID=self.slaveID)
         return float(rawValue) if rawValue is not None else None # mg/l
         
     def setPWM(self, channel: int, value: int) -> bool:
